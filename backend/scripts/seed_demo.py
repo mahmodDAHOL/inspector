@@ -105,7 +105,7 @@ async def seed():
 
 
 async def clear_existing(session: AsyncSession):
-    for table in ["digital_signatures", "investigation_notes", "audit_logs", "complaints", "users", "departments"]:
+    for table in ["digital_signatures", "investigation_notes", "complaint_logs", "activity_logs", "complaints", "users", "departments"]:
         await session.execute(text(f"TRUNCATE TABLE {table} RESTART IDENTITY CASCADE"))
     await session.commit()
     print("Cleared existing demo data.")

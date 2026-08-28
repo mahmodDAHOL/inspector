@@ -41,7 +41,7 @@ async def totp_secret():
 
 async def test_full_login_flow_issues_tokens(totp_secret):
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    async with httpx.AsyncClient(transport=transport, base_url="http://localhost") as client:
         resp = await client.post("/api/v1/auth/login", json={"username": "admin", "password": "admin123"})
         assert resp.status_code == 200
         temp_token = resp.json()["temp_token"]
@@ -56,13 +56,13 @@ async def test_full_login_flow_issues_tokens(totp_secret):
 
 async def test_wrong_password_is_rejected():
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    async with httpx.AsyncClient(transport=transport, base_url="http://localhost") as client:
         resp = await client.post("/api/v1/auth/login", json={"username": "admin", "password": "definitely-wrong"})
         assert resp.status_code == 401
 
 
 async def test_protected_endpoint_rejects_missing_token():
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    async with httpx.AsyncClient(transport=transport, base_url="http://localhost") as client:
         resp = await client.get("/api/v1/dashboard/stats")
         assert resp.status_code == 401

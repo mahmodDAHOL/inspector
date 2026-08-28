@@ -97,7 +97,7 @@ async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/verify-totp", dependencies=[mfa_rate_limit])
-async def verify_totp(request: TOTPVerifyRequest, db: AsyncSession = Depends(get_db)):
+async def verify_totp_step(request: TOTPVerifyRequest, db: AsyncSession = Depends(get_db)):
     """Step 2: Verify TOTP code and issue tokens"""
     try:
         payload = decode_token(request.temp_token)
