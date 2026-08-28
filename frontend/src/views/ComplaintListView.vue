@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <AppHeader />
+  <AppLayout>
     <main class="content">
       <h1>{{ $t('complaints.title') }}</h1>
       <div class="filters">
@@ -19,13 +18,13 @@
         </tbody>
       </table>
     </main>
-  </div>
+  </AppLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useComplaintStore } from '../stores/complaints'
-import AppHeader from '../components/AppHeader.vue'
+import AppLayout from '../components/AppLayout.vue'
 
 const store = useComplaintStore()
 const filter = ref({ status: '', search: '' })

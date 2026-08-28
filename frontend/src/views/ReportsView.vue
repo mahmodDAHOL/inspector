@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <AppHeader />
+  <AppLayout>
     <main class="content">
       <h1>Reports</h1>
       <div class="report-cards">
@@ -10,9 +9,9 @@
         </div>
       </div>
     </main>
-  </div>
+  </AppLayout>
 </template>
 
 <script setup>
-import AppHeader from '../components/AppHeader.vue'
+import AppLayout from '../components/AppLayout.vue'
 </script>

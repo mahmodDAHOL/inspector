@@ -1,9 +1,20 @@
 """Users API Routes (Admin Only)"""
-from fastapi import APIRouter
-from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
+
+from fastapi import APIRouter, HTTPException, status, Depends
+from pydantic import BaseModel, UUID4
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.session import get_db
+from app.models import User, Department
+from app.core.security import get_password_hash, generate_totp_secret
+from app.core.encryption import get_encryption_service
 
 router = APIRouter()
+enc = get_encryption_service()
+
+ROLES = ["super_admin", "admin", "senior_inspector", "inspector", "viewer"]
 
 
 class UserCreate(BaseModel):
@@ -12,18 +23,164 @@ class UserCreate(BaseModel):
     full_name_en: str
     email: str
     role: str
+    password: str
+    department_id: Optional[UUID4] = None
 
 
-@router.get("")
-async def list_users():
+class UserUpdate(BaseModel):
+    full_name_ar: Optional[str] = None
+    full_name_en: Optional[str] = None
+    email: Optional[str] = None
+    role: Optional[str] = None
+    is_active: Optional[bool] = None
+    department_id: Optional[UUID4] = None
+
+
+class UserResponse(BaseModel):
+    id: UUID4
+    username: str
+    full_name_ar: str
+    full_name_en: str
+    email: Optional[str]
+    role: str
+    is_active: bool
+    department_id: Optional[UUID4]
+    created_at: Optional[str]
+
+    class Config:
+        from_attributes = True
+
+
+@router.get("/roles")
+async def list_roles():
+    """List available user roles"""
+    return {"roles": ROLES}
+
+
+@router.get("", response_model=List[UserResponse])
+async def list_users(db: AsyncSession = Depends(get_db)):
     """List all users (Admin only)"""
+    result = await db.execute(select(User).order_by(User.created_at.desc()))
+    users = result.scalars().all()
     return [
-        {"id": "user-1", "username": "admin", "full_name_ar": "مدير النظام", "role": "super_admin"},
-        {"id": "user-2", "username": "inspector_ahmed", "full_name_ar": "أحمد خالد", "role": "senior_inspector"}
+        {
+            "id": u.id,
+            "username": u.username,
+            "full_name_ar": u.full_name_ar,
+            "full_name_en": u.full_name_en,
+            "email": enc.decrypt(u.email, context="email") or None,
+            "role": u.role,
+            "is_active": u.is_active,
+            "department_id": u.department_id,
+            "created_at": u.created_at.isoformat() if u.created_at else None,
+        }
+        for u in users
     ]
 
 
-@router.post("")
-async def create_user(user: UserCreate):
+@router.get("/{user_id}", response_model=UserResponse)
+async def get_user(user_id: UUID4, db: AsyncSession = Depends(get_db)):
+    """Get user details"""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return {
+        "id": user.id,
+        "username": user.username,
+        "full_name_ar": user.full_name_ar,
+        "full_name_en": user.full_name_en,
+        "email": enc.decrypt(user.email, context="email") or None,
+        "role": user.role,
+        "is_active": user.is_active,
+        "department_id": user.department_id,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+    }
+
+
+@router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     """Create new user"""
-    return {"id": "new-user-uuid", "username": user.username, "message": "User created"}
+    existing = await db.execute(select(User).where(User.username == user.username))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists")
+
+    department_id = user.department_id
+    if not department_id:
+        dept_result = await db.execute(select(Department.id).limit(1))
+        department_row = dept_result.fetchone()
+        department_id = department_row[0] if department_row else None
+
+    new_user = User(
+        username=user.username,
+        password_hash=get_password_hash(user.password),
+        full_name_ar=user.full_name_ar,
+        full_name_en=user.full_name_en,
+        email=enc.encrypt(user.email, context="email"),
+        phone=enc.encrypt("", context="phone"),
+        role=user.role,
+        department_id=department_id,
+        totp_secret=enc.encrypt(generate_totp_secret(), context="totp_secret"),
+    )
+    db.add(new_user)
+    await db.commit()
+    await db.refresh(new_user)
+    return {
+        "id": new_user.id,
+        "username": new_user.username,
+        "full_name_ar": new_user.full_name_ar,
+        "full_name_en": new_user.full_name_en,
+        "email": enc.decrypt(new_user.email, context="email") or None,
+        "role": new_user.role,
+        "is_active": new_user.is_active,
+        "department_id": new_user.department_id,
+        "created_at": new_user.created_at.isoformat() if new_user.created_at else None,
+    }
+
+
+@router.patch("/{user_id}", response_model=UserResponse)
+async def update_user(user_id: UUID4, update: UserUpdate, db: AsyncSession = Depends(get_db)):
+    """Update user"""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if update.full_name_ar is not None:
+        user.full_name_ar = update.full_name_ar
+    if update.full_name_en is not None:
+        user.full_name_en = update.full_name_en
+    if update.email is not None:
+        user.email = enc.encrypt(update.email, context="email")
+    if update.role is not None:
+        user.role = update.role
+    if update.is_active is not None:
+        user.is_active = update.is_active
+    if update.department_id is not None:
+        user.department_id = update.department_id
+
+    await db.commit()
+    await db.refresh(user)
+    return {
+        "id": user.id,
+        "username": user.username,
+        "full_name_ar": user.full_name_ar,
+        "full_name_en": user.full_name_en,
+        "email": enc.decrypt(user.email, context="email") or None,
+        "role": user.role,
+        "is_active": user.is_active,
+        "department_id": user.department_id,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+    }
+
+
+@router.post("/{user_id}/deactivate")
+async def deactivate_user(user_id: UUID4, db: AsyncSession = Depends(get_db)):
+    """Deactivate user"""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    user.is_active = False
+    await db.commit()
+    return {"message": "User deactivated", "user_id": str(user_id)}

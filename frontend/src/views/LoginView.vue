@@ -44,7 +44,7 @@ async function submitCredentials() {
 
 async function verify() {
   await auth.verifyTOTP(totpDigits.join(''))
-  router.push('/dashboard')
+  router.push('/')
 }
 </script>
 

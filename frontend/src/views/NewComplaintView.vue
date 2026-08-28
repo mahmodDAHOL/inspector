@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <AppHeader />
+  <AppLayout>
     <main class="content">
       <h1>New Complaint</h1>
       <form @submit.prevent="submit">
@@ -15,14 +14,14 @@
         <button type="submit" class="btn-primary">Save</button>
       </form>
     </main>
-  </div>
+  </AppLayout>
 </template>
 
 <script setup>
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useComplaintStore } from '../stores/complaints'
-import AppHeader from '../components/AppHeader.vue'
+import AppLayout from '../components/AppLayout.vue'
 
 const router = useRouter()
 const store = useComplaintStore()

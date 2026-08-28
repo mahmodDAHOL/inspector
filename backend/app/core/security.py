@@ -33,6 +33,17 @@ def create_refresh_token(data: dict) -> str:
     return jwt.encode(to_encode, get_settings().SECRET_KEY, algorithm="HS256")
 
 
+def create_temp_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=5)
+    to_encode.update({"exp": expire, "type": "temp"})
+    return jwt.encode(to_encode, get_settings().SECRET_KEY, algorithm="HS256")
+
+
+def decode_token(token: str) -> dict:
+    return jwt.decode(token, get_settings().SECRET_KEY, algorithms=["HS256"])
+
+
 def generate_totp_secret() -> str:
     return pyotp.random_base32()
 

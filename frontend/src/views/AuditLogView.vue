@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <AppHeader />
+  <AppLayout>
     <main class="content">
       <h1>Audit Log</h1>
       <table>
@@ -10,9 +9,9 @@
         </tbody>
       </table>
     </main>
-  </div>
+  </AppLayout>
 </template>
 
 <script setup>
-import AppHeader from '../components/AppHeader.vue'
+import AppLayout from '../components/AppLayout.vue'
 </script>

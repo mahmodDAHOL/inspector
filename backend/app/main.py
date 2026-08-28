@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from contextlib import asynccontextmanager
 
-from app.api.v1 import auth, complaints, external, users, audit, reports
+from app.api.v1 import auth, complaints, external, users, audit, reports, dashboard
 
 
 @asynccontextmanager
@@ -41,6 +41,7 @@ app.include_router(external.router, prefix="/api/v1/external", tags=["External"]
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(audit.router, prefix="/api/v1/audit", tags=["Audit"])
 app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
+app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["Dashboard"])
 
 
 @app.get("/health")
