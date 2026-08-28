@@ -1,0 +1,87 @@
+/* Inspection Portal — Main Styles */
+
+:root {
+  --color-primary: #1B5E5E;
+  --color-gold: #A68B5B;
+  --bg-body: #F5F5F0;
+  --bg-card: #FFFFFF;
+  --bg-muted: #F0F0EA;
+  --text-primary: #1a1a1a;
+  --text-secondary: #4a4a4a;
+  --text-tertiary: #7a7a7a;
+  --border-color: #d4d0c8;
+  --color-success: #4CAF50;
+  --color-warning: #C4943A;
+  --color-danger: #B85450;
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.dark {
+  --bg-body: #0f1419;
+  --bg-card: #1a1f2e;
+  --bg-muted: #252b3b;
+  --text-primary: #e8e8e8;
+  --text-secondary: #b8b8b8;
+  --text-tertiary: #888888;
+  --border-color: #2d3548;
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.content { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+h1 { font-size: 24px; margin-bottom: 20px; }
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.btn-primary {
+  padding: 10px 20px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.badge.urgent { background: rgba(184,84,80,0.12); color: var(--color-danger); }
+.badge.pending { background: rgba(196,148,58,0.12); color: var(--color-warning); }
+.badge.closed { background: rgba(76,175,80,0.12); color: var(--color-success); }
+
+.mono { font-family: monospace; font-size: 13px; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+th { background: var(--bg-muted); padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid var(--border-color); }
+td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+tr:hover td { background: var(--bg-muted); cursor: pointer; }
+
+.filters { display: flex; gap: 12px; margin-bottom: 16px; }
+.filters select, .filters input { width: auto; min-width: 200px; margin: 0; }

@@ -1,0 +1,93 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: inspection-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: inspection_portal
+      POSTGRES_USER: inspection_app
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ChangeMeStrongPassword123!}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    networks:
+      - inspection-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inspection_app -d inspection_portal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: inspection-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-RedisStrongPass456!} --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - inspection-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inspection-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://inspection_app:${DB_PASSWORD}@db:5432/inspection_portal
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+    volumes:
+      - uploads_data:/var/inspection/uploads
+    networks:
+      - inspection-network
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: inspection-frontend
+    restart: unless-stopped
+    networks:
+      - inspection-network
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:1.24-alpine
+    container_name: inspection-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - uploads_data:/var/inspection/uploads:ro
+    networks:
+      - inspection-network
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
+
+networks:
+  inspection-network:
+    driver: bridge

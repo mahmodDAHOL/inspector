@@ -1,0 +1,6 @@
+{
+  "login": { "title": "تسجيل الدخول الآمن", "subtitle": "مديرية الرقابة والتفتيش", "next": "التالي", "verify": "تحقق" },
+  "dashboard": { "title": "لوحة التحكم", "newComplaint": "شكوى جديدة", "viewAll": "عرض الكل" },
+  "complaints": { "title": "الشكاوى", "new": "شكوى جديدة" },
+  "common": { "save": "حفظ", "cancel": "إلغاء", "back": "رجوع", "all": "الكل" }
+}

@@ -1,0 +1,6 @@
+{
+  "login": { "title": "Secure Login", "subtitle": "Inspection Directorate", "next": "Next", "verify": "Verify" },
+  "dashboard": { "title": "Dashboard", "newComplaint": "New Complaint", "viewAll": "View All" },
+  "complaints": { "title": "Complaints", "new": "New Complaint" },
+  "common": { "save": "Save", "cancel": "Cancel", "back": "Back", "all": "All" }
+}
