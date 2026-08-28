@@ -154,7 +154,11 @@ async def create_complaints(session: AsyncSession, users: dict):
         priority = PRIORITIES[i % 3]
         assigned = [inspector_user.id, junior_user.id, None][i % 3]
         created_by = admin_user.id if i % 2 == 0 else inspector_user.id
+        created_at = datetime.utcnow() - timedelta(days=i + 2)
         closed_at = datetime.utcnow() - timedelta(days=i) if status == "closed" else None
+        # Complaints past "received" have already gotten a first response; vary the delay
+        # so the response-time SLA metrics on the dashboard show realistic numbers.
+        first_response_at = created_at + timedelta(hours=4 + (i % 5) * 6) if status != "received" else None
 
         complaint = Complaint(
             id=uuid4(),
@@ -173,9 +177,10 @@ async def create_complaints(session: AsyncSession, users: dict):
             created_by=created_by,
             erp_reference_id=f"ERP-{datetime.utcnow().year}-{1000 + i}",
             is_anonymous=False,
-            created_at=datetime.utcnow() - timedelta(days=i + 2),
+            created_at=created_at,
             updated_at=datetime.utcnow() - timedelta(days=i),
             closed_at=closed_at,
+            first_response_at=first_response_at,
         )
         session.add(complaint)
     print(f"Created {len(COMPLAINT_TITLES)} demo complaints.")

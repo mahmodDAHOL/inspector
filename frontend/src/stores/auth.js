@@ -23,7 +23,9 @@ export const useAuthStore = defineStore('auth', () => {
     })
     accessToken.value = res.data.access_token
     localStorage.setItem('access_token', accessToken.value)
+    localStorage.removeItem('temp_token')
     user.value = res.data.user
+    localStorage.setItem('user', JSON.stringify(res.data.user))
     return res.data
   }
 
@@ -31,6 +33,8 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     accessToken.value = null
     localStorage.removeItem('access_token')
+    localStorage.removeItem('temp_token')
+    localStorage.removeItem('user')
     window.location.href = '/login'
   }
 

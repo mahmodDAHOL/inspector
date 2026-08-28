@@ -11,9 +11,12 @@ export const useUsersStore = defineStore('users', () => {
 
   async function fetchUsers() {
     loading.value = true
-    const res = await api.get('/users')
-    users.value = res.data
-    loading.value = false
+    try {
+      const res = await api.get('/users')
+      users.value = res.data
+    } finally {
+      loading.value = false
+    }
   }
 
   async function fetchRoles() {

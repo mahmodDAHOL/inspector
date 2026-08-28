@@ -13,7 +13,10 @@
   --color-success: #4CAF50;
   --color-warning: #C4943A;
   --color-danger: #B85450;
+  --color-info: #3B7EA1;
+  --color-neutral: #7a7a7a;
   --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
 }
 
 .dark {
@@ -25,6 +28,7 @@
   --text-tertiary: #888888;
   --border-color: #2d3548;
   --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.4);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -71,10 +75,19 @@ input:focus, select:focus, textarea:focus {
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
+  background: rgba(122,122,122,0.12);
+  color: var(--color-neutral);
+  white-space: nowrap;
 }
-.badge.urgent { background: rgba(184,84,80,0.12); color: var(--color-danger); }
-.badge.pending { background: rgba(196,148,58,0.12); color: var(--color-warning); }
+/* status */
+.badge.received { background: rgba(59,126,161,0.12); color: var(--color-info); }
+.badge.under_investigation { background: rgba(196,148,58,0.12); color: var(--color-warning); }
+.badge.escalated { background: rgba(184,84,80,0.12); color: var(--color-danger); }
 .badge.closed { background: rgba(76,175,80,0.12); color: var(--color-success); }
+/* priority */
+.badge.normal { background: rgba(122,122,122,0.12); color: var(--color-neutral); }
+.badge.urgent { background: rgba(196,148,58,0.12); color: var(--color-warning); }
+.badge.critical { background: rgba(184,84,80,0.12); color: var(--color-danger); }
 
 .mono { font-family: monospace; font-size: 13px; }
 

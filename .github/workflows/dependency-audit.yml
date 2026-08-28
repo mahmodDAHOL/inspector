@@ -1,0 +1,72 @@
+name: Dependency Audit
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  schedule:
+    # Weekly, in case a new CVE lands in an already-pinned dependency
+    - cron: "0 6 * * 1"
+
+jobs:
+  pip-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pip-audit
+        run: pip install pip-audit
+      - name: Audit backend dependencies
+        run: pip-audit -r backend/requirements.txt
+
+  backend-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: inspection_portal
+          POSTGRES_USER: inspection_app
+          POSTGRES_PASSWORD: ci-test-password
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U inspection_app -d inspection_portal"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      SECRET_KEY: ci-only-secret-key-never-use-in-production
+      MASTER_ENCRYPTION_KEY: Y2ktb25seS1tYXN0ZXIta2V5LW5ldmVyLXVzZS1pbi1wcm9k
+      DATABASE_URL: postgresql+asyncpg://inspection_app:ci-test-password@localhost:5432/inspection_portal
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -r requirements-dev.txt
+      - name: Run migrations
+        working-directory: backend
+        run: alembic upgrade head
+      - name: Seed demo data
+        working-directory: backend
+        run: python scripts/seed_demo.py
+      - name: Run tests
+        working-directory: backend
+        run: pytest -v
+
+  npm-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Audit frontend dependencies
+        working-directory: frontend
+        run: npm audit --audit-level=high

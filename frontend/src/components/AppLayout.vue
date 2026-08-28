@@ -2,7 +2,7 @@
   <div class="app-layout" :class="{ rtl: locale === 'ar' }">
     <aside class="sidebar">
       <div class="brand">
-        <div class="logo-box">م</div>
+        <img src="/logo.jpg" alt="" class="logo-box" />
         <div class="brand-text">
           <h1 class="app-title">{{ $t('landing.title') }}</h1>
           <p class="app-subtitle">{{ $t('landing.subtitle') }}</p>
@@ -67,7 +67,7 @@ const links = computed(() => {
     { to: '/reports', label: t('landing.reports'), icon: '▤' },
     { to: '/audit', label: t('landing.audit'), icon: '◷' }
   ]
-  if (userRole.value === 'super_admin') {
+  if (['admin', 'super_admin'].includes(userRole.value)) {
     base.push({ to: '/admin', label: t('admin.title'), icon: '⚙' })
   }
   return base
@@ -125,14 +125,10 @@ function logout() {
 .logo-box {
   width: 50px;
   height: 50px;
-  background: var(--color-gold);
-  color: #ffffff;
+  background: #ffffff;
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
+  object-fit: contain;
+  padding: 5px;
   flex-shrink: 0;
 }
 

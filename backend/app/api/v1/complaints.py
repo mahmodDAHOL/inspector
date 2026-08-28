@@ -1,4 +1,5 @@
 """Complaints API Routes"""
+import base64
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
@@ -9,10 +10,14 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.models import Complaint, User
+from app.models import Complaint, User, ComplaintLog
 from app.core.encryption import get_encryption_service
+from app.core.deps import get_current_user, require_roles
+from app.core.security import verify_totp
+from app.core.signing import sign_payload
+from app.core.log_chain import next_chain_hashes
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 enc = get_encryption_service()
 
 VALID_STATUS_TRANSITIONS = {
@@ -21,6 +26,9 @@ VALID_STATUS_TRANSITIONS = {
     "escalated": ["under_investigation", "closed"],
     "closed": [],
 }
+
+# "viewer" is read-only everywhere in the complaints module; every other role can act on complaints.
+require_writer = require_roles("super_admin", "admin", "senior_inspector", "inspector")
 
 
 class ComplaintCreate(BaseModel):
@@ -78,7 +86,23 @@ class NoteCreateRequest(BaseModel):
 
 
 class SignRequest(BaseModel):
-    pin: str
+    totp_code: str
+
+
+async def _log_activity(db: AsyncSession, complaint_id, action: str, description: str, performed_by) -> None:
+    """Record an entry in the complaint's activity log (flushed with the caller's commit)"""
+    created_at = datetime.utcnow()
+    payload = f"{complaint_id}|{action}|{description}|{performed_by}|{created_at.isoformat()}"
+    prev_hash, row_hash = await next_chain_hashes(db, ComplaintLog, payload)
+    db.add(ComplaintLog(
+        complaint_id=complaint_id,
+        action=action,
+        description=description,
+        performed_by=performed_by,
+        created_at=created_at,
+        prev_hash=prev_hash,
+        row_hash=row_hash,
+    ))
 
 
 def _serialize_complaint(c: Complaint) -> dict:
@@ -100,29 +124,34 @@ def _serialize_complaint(c: Complaint) -> dict:
 async def list_complaints(
     status: Optional[str] = None,
     priority: Optional[str] = None,
+    limit: int = 200,
+    offset: int = 0,
     db: AsyncSession = Depends(get_db),
 ):
-    """List all complaints with optional filters"""
+    """List complaints with optional filters, capped and paginated (default page size 200)"""
     query = select(Complaint)
     if status:
         query = query.where(Complaint.status == status)
     if priority:
         query = query.where(Complaint.priority == priority)
-    query = query.order_by(Complaint.created_at.desc())
+    query = query.order_by(Complaint.created_at.desc()).offset(max(offset, 0)).limit(min(max(limit, 1), 500))
     result = await db.execute(query)
     complaints = result.scalars().all()
     return [_serialize_complaint(c) for c in complaints]
 
 
 @router.post("", response_model=ComplaintResponse, status_code=status.HTTP_201_CREATED)
-async def create_complaint(complaint: ComplaintCreate, db: AsyncSession = Depends(get_db)):
+async def create_complaint(
+    complaint: ComplaintCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_writer),
+):
     """Create a new complaint"""
     count_result = await db.execute(select(Complaint))
     count = len(count_result.scalars().all())
     complaint_number = f"INS-{datetime.utcnow().year}-{count + 1:04d}"
 
-    created_by_result = await db.execute(select(User).limit(1))
-    created_by = created_by_result.scalar_one().id
+    created_by = current_user.id
 
     new_complaint = Complaint(
         complaint_number=complaint_number,
@@ -141,6 +170,8 @@ async def create_complaint(complaint: ComplaintCreate, db: AsyncSession = Depend
         created_by=created_by,
     )
     db.add(new_complaint)
+    await db.flush()
+    await _log_activity(db, new_complaint.id, "created", f"Complaint received ({complaint.priority} priority)", current_user.id)
     await db.commit()
     await db.refresh(new_complaint)
     return _serialize_complaint(new_complaint)
@@ -167,11 +198,37 @@ async def get_complaint(complaint_id: UUID4, db: AsyncSession = Depends(get_db))
     }
 
 
+@router.get("/{complaint_id}/history")
+async def get_complaint_history(complaint_id: UUID4, db: AsyncSession = Depends(get_db)):
+    """Get the activity log (audit trail) for a complaint"""
+    complaint_exists = await db.execute(select(Complaint.id).where(Complaint.id == complaint_id))
+    if not complaint_exists.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
+
+    result = await db.execute(
+        select(ComplaintLog, User)
+        .outerjoin(User, ComplaintLog.performed_by == User.id)
+        .where(ComplaintLog.complaint_id == complaint_id)
+        .order_by(ComplaintLog.created_at.desc())
+    )
+    return [
+        {
+            "id": str(log.id),
+            "action": log.action,
+            "description": log.description,
+            "performed_by": user.full_name_ar if user else None,
+            "created_at": log.created_at.isoformat() if log.created_at else None,
+        }
+        for log, user in result.all()
+    ]
+
+
 @router.patch("/{complaint_id}/status")
 async def update_status(
     complaint_id: UUID4,
     request: StatusUpdateRequest,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_writer),
 ):
     """Update complaint status with workflow validation"""
     result = await db.execute(select(Complaint).where(Complaint.id == complaint_id))
@@ -180,6 +237,7 @@ async def update_status(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
 
     new_status = request.status
+    old_status = complaint.status
     allowed = VALID_STATUS_TRANSITIONS.get(complaint.status, [])
     if new_status not in allowed and complaint.status != new_status:
         raise HTTPException(
@@ -187,12 +245,18 @@ async def update_status(
             detail=f"Invalid transition from {complaint.status} to {new_status}",
         )
 
+    if complaint.first_response_at is None and new_status != complaint.status:
+        complaint.first_response_at = datetime.utcnow()
+
     complaint.status = new_status
     complaint.updated_at = datetime.utcnow()
     if new_status == "closed":
         complaint.closed_at = datetime.utcnow()
     elif complaint.status in ("received", "under_investigation") and new_status != "closed":
         complaint.closed_at = None
+
+    if new_status != old_status:
+        await _log_activity(db, complaint_id, "status_changed", f"Status changed from {old_status} to {new_status}", current_user.id)
 
     await db.commit()
     await db.refresh(complaint)
@@ -204,6 +268,7 @@ async def assign_complaint(
     complaint_id: UUID4,
     request: AssignRequest,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_writer),
 ):
     """Assign complaint to a user"""
     result = await db.execute(select(Complaint).where(Complaint.id == complaint_id))
@@ -212,17 +277,25 @@ async def assign_complaint(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
 
     user_result = await db.execute(select(User).where(User.id == request.assigned_to))
-    if not user_result.scalar_one_or_none():
+    assignee = user_result.scalar_one_or_none()
+    if not assignee:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
 
     complaint.assigned_to = request.assigned_to
     complaint.updated_at = datetime.utcnow()
+    if complaint.first_response_at is None:
+        complaint.first_response_at = datetime.utcnow()
+    await _log_activity(db, complaint_id, "assigned", f"Assigned to {assignee.full_name_ar}", current_user.id)
     await db.commit()
     return {"message": "Complaint assigned", "complaint_id": str(complaint_id), "assigned_to": str(request.assigned_to)}
 
 
 @router.post("/{complaint_id}/escalate")
-async def escalate_complaint(complaint_id: UUID4, db: AsyncSession = Depends(get_db)):
+async def escalate_complaint(
+    complaint_id: UUID4,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_writer),
+):
     """Escalate complaint priority and status"""
     result = await db.execute(select(Complaint).where(Complaint.id == complaint_id))
     complaint = result.scalar_one_or_none()
@@ -232,16 +305,29 @@ async def escalate_complaint(complaint_id: UUID4, db: AsyncSession = Depends(get
     if complaint.status not in ("received", "under_investigation"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot escalate this complaint")
 
+    old_status = complaint.status
     complaint.status = "escalated"
     complaint.priority = "urgent"
     complaint.updated_at = datetime.utcnow()
+    await _log_activity(db, complaint_id, "escalated", f"Escalated from {old_status} to urgent priority", current_user.id)
     await db.commit()
     return {"message": "Complaint escalated", "complaint_id": str(complaint_id)}
 
 
+CONFIDENTIAL_NOTE_ROLES = ("senior_inspector", "admin", "super_admin")
+
+
 @router.get("/{complaint_id}/notes")
-async def list_notes(complaint_id: UUID4, db: AsyncSession = Depends(get_db)):
-    """List investigation notes for a complaint"""
+async def list_notes(
+    complaint_id: UUID4,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """List investigation notes for a complaint.
+
+    Notes marked confidential are only visible to senior_inspector/admin/super_admin,
+    or to the user who wrote them — everyone else sees a placeholder instead of the content.
+    """
     result = await db.execute(
         text(
             """
@@ -252,14 +338,18 @@ async def list_notes(complaint_id: UUID4, db: AsyncSession = Depends(get_db)):
             """
         ).bindparams(complaint_id=complaint_id)
     )
+    can_see_confidential = current_user.role in CONFIDENTIAL_NOTE_ROLES
     notes = []
     for row in result.fetchall():
+        is_own = row.created_by and str(row.created_by) == str(current_user.id)
+        visible = not row.is_confidential or can_see_confidential or is_own
         notes.append({
             "id": str(row.id),
             "complaint_id": str(row.complaint_id),
-            "content": enc.decrypt(row.note_content, context="note_content") or None,
+            "content": enc.decrypt(row.note_content, context="note_content") if visible else None,
             "note_type": row.note_type,
             "is_confidential": row.is_confidential,
+            "hidden": row.is_confidential and not visible,
             "created_by": str(row.created_by) if row.created_by else None,
             "created_at": row.created_at.isoformat() if row.created_at else None,
         })
@@ -271,6 +361,7 @@ async def add_note(
     complaint_id: UUID4,
     request: NoteCreateRequest,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_writer),
 ):
     """Add investigation note"""
     result = await db.execute(select(Complaint).where(Complaint.id == complaint_id))
@@ -278,8 +369,9 @@ async def add_note(
     if not complaint:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
 
-    created_by_result = await db.execute(select(User).limit(1))
-    created_by = created_by_result.scalar_one().id
+    created_by = current_user.id
+    if complaint.first_response_at is None:
+        complaint.first_response_at = datetime.utcnow()
 
     note_result = await db.execute(
         text(
@@ -297,6 +389,8 @@ async def add_note(
         )
     )
     row = note_result.fetchone()
+    note_kind = "confidential note" if request.is_confidential else "note"
+    await _log_activity(db, complaint_id, "note_added", f"Investigation {note_kind} added", current_user.id)
     await db.commit()
     return {
         "id": str(row.id),
@@ -312,8 +406,13 @@ async def sign_report(
     complaint_id: UUID4,
     request: SignRequest,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles("senior_inspector", "admin", "super_admin")),
 ):
-    """Sign final report with digital signature"""
+    """Sign the final report with a real RSA-PSS/SHA-384 digital signature.
+
+    Identity is re-confirmed with the signer's own current TOTP code (instead of a
+    PIN shared by everyone) — this is a real re-authentication step, not a lookup.
+    """
     result = await db.execute(select(Complaint).where(Complaint.id == complaint_id))
     complaint = result.scalar_one_or_none()
     if not complaint:
@@ -322,12 +421,40 @@ async def sign_report(
     if complaint.status != "closed":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Can only sign closed complaints")
 
-    if request.pin != "1234":
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid signature PIN")
+    totp_secret = enc.decrypt(current_user.totp_secret, context="totp_secret")
+    if not verify_totp(totp_secret, request.totp_code):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication code")
+
+    signed_at = datetime.utcnow()
+    payload = f"{complaint.complaint_number}|{complaint.status}|{current_user.id}|{signed_at.isoformat()}"
+    sig = sign_payload(payload)
+
+    insert_result = await db.execute(
+        text(
+            """
+            INSERT INTO digital_signatures (report_id, signer_id, signature_data, certificate_thumbprint, signed_at)
+            VALUES (:report_id, :signer_id, :signature_data, :certificate_thumbprint, :signed_at)
+            RETURNING id
+            """
+        ).bindparams(
+            report_id=complaint_id,
+            signer_id=current_user.id,
+            signature_data=base64.b64decode(sig["signature"]),
+            certificate_thumbprint=sig["certificate_thumbprint"],
+            signed_at=signed_at,
+        )
+    )
+    signature_id = insert_result.fetchone().id
+
+    await _log_activity(db, complaint_id, "signed", f"Report digitally signed by {current_user.full_name_ar}", current_user.id)
+    await db.commit()
 
     return {
         "signed": True,
+        "signature_id": str(signature_id),
         "complaint_id": str(complaint_id),
-        "algorithm": "RSA-PSS-SHA384",
-        "signed_at": datetime.utcnow().isoformat(),
+        "algorithm": sig["algorithm"],
+        "certificate_thumbprint": sig["certificate_thumbprint"],
+        "signature": sig["signature"],
+        "signed_at": signed_at.isoformat(),
     }

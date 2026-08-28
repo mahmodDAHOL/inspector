@@ -6,6 +6,7 @@ export const useComplaintStore = defineStore('complaints', () => {
   const complaints = ref([])
   const currentComplaint = ref(null)
   const notes = ref([])
+  const history = ref([])
   const loading = ref(false)
 
   const totalCount = computed(() => complaints.value.length)
@@ -14,16 +15,22 @@ export const useComplaintStore = defineStore('complaints', () => {
 
   async function fetchAll(params = {}) {
     loading.value = true
-    const res = await api.get('/complaints', { params })
-    complaints.value = res.data
-    loading.value = false
+    try {
+      const res = await api.get('/complaints', { params })
+      complaints.value = res.data
+    } finally {
+      loading.value = false
+    }
   }
 
   async function fetchOne(id) {
     loading.value = true
-    const res = await api.get(`/complaints/${id}`)
-    currentComplaint.value = res.data
-    loading.value = false
+    try {
+      const res = await api.get(`/complaints/${id}`)
+      currentComplaint.value = res.data
+    } finally {
+      loading.value = false
+    }
   }
 
   async function create(data) {
@@ -65,14 +72,19 @@ export const useComplaintStore = defineStore('complaints', () => {
     notes.value = res.data
   }
 
+  async function fetchHistory(id) {
+    const res = await api.get(`/complaints/${id}/history`)
+    history.value = res.data
+  }
+
   async function addNote(id, content, is_confidential = false) {
     const res = await api.post(`/complaints/${id}/notes`, { content, is_confidential })
     notes.value.unshift(res.data)
     return res.data
   }
 
-  async function sign(id, pin) {
-    const res = await api.post(`/complaints/${id}/sign`, { pin })
+  async function sign(id, totpCode) {
+    const res = await api.post(`/complaints/${id}/sign`, { totp_code: totpCode })
     return res.data
   }
 
@@ -80,6 +92,7 @@ export const useComplaintStore = defineStore('complaints', () => {
     complaints,
     currentComplaint,
     notes,
+    history,
     loading,
     totalCount,
     pendingCount,
@@ -91,6 +104,7 @@ export const useComplaintStore = defineStore('complaints', () => {
     assign,
     escalate,
     fetchNotes,
+    fetchHistory,
     addNote,
     sign,
   }

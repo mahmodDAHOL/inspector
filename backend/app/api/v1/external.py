@@ -1,9 +1,45 @@
-"""External API — MediaGate Integration"""
-from fastapi import APIRouter, Header, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional
+"""External API — MediaGate Integration
 
-router = APIRouter()
+Every route here requires a valid X-API-Key (matched against MEDIAGATE_API_KEY)
+and a valid X-Signature (HMAC-SHA256 of the raw request body, keyed with the
+same API key), plus a per-IP rate limit — this endpoint is reachable from the
+public internet through nginx, so none of this is optional hardening.
+"""
+import hashlib
+import hmac
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from pydantic import BaseModel
+
+from app.core.config import get_settings
+from app.core.rate_limit import rate_limit
+
+
+async def verify_mediagate_request(
+    request: Request,
+    x_api_key: str = Header(None, alias="X-API-Key"),
+    x_signature: str = Header(None, alias="X-Signature"),
+):
+    settings = get_settings()
+    if not settings.MEDIAGATE_API_KEY:
+        # No key configured server-side — refuse everything rather than accept unauthenticated traffic.
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="MediaGate integration not configured")
+    if not x_api_key or not hmac.compare_digest(x_api_key, settings.MEDIAGATE_API_KEY):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
+
+    body = await request.body()
+    expected_signature = hmac.new(settings.MEDIAGATE_API_KEY.encode("utf-8"), body, hashlib.sha256).hexdigest()
+    if not x_signature or not hmac.compare_digest(x_signature, expected_signature):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid signature")
+
+
+router = APIRouter(
+    dependencies=[
+        Depends(rate_limit("external", max_requests=30, window_seconds=60)),
+        Depends(verify_mediagate_request),
+    ]
+)
 
 
 class ComplaintPollItem(BaseModel):
@@ -30,8 +66,6 @@ async def poll_complaints(
     since: Optional[str] = None,
     page: int = 1,
     per_page: int = 20,
-    x_api_key: str = Header(None, alias="X-API-Key"),
-    x_signature: str = Header(None, alias="X-Signature")
 ):
     """Poll MediaGate for new complaints"""
     return {

@@ -19,6 +19,21 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
+def validate_password_strength(password: str) -> str:
+    """Raise ValueError if the password is too short or too simple. Returns it unchanged otherwise."""
+    if len(password) < 10:
+        raise ValueError("Password must be at least 10 characters long")
+    classes_present = sum([
+        any(c.islower() for c in password),
+        any(c.isupper() for c in password),
+        any(c.isdigit() for c in password),
+        any(not c.isalnum() for c in password),
+    ])
+    if classes_present < 3:
+        raise ValueError("Password must mix at least 3 of: lowercase, uppercase, digits, symbols")
+    return password
+
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))

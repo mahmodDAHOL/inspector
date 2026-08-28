@@ -8,9 +8,12 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.models import Complaint
+from app.models import Complaint, User
+from app.core.deps import get_current_user
+from app.core.activity_log import log_activity
+from app.api.v1.dashboard import _response_metrics
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 class SummaryRequest(BaseModel):
@@ -19,7 +22,11 @@ class SummaryRequest(BaseModel):
 
 
 @router.post("/summary")
-async def generate_summary(request: SummaryRequest, db: AsyncSession = Depends(get_db)):
+async def generate_summary(
+    request: SummaryRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Generate complaints summary report"""
     query = select(Complaint)
 
@@ -32,6 +39,10 @@ async def generate_summary(request: SummaryRequest, db: AsyncSession = Depends(g
 
     result = await db.execute(query)
     complaints = result.scalars().all()
+
+    date_range = f"{request.from_date or 'earliest'} to {request.to_date or 'latest'}"
+    await log_activity(db, "report", "report_generated", f"Complaints summary report generated ({date_range}, {len(complaints)} complaints)", performed_by=current_user.id)
+    await db.commit()
 
     by_status = {}
     by_priority = {}
@@ -52,6 +63,7 @@ async def generate_summary(request: SummaryRequest, db: AsyncSession = Depends(g
         "by_status": by_status,
         "by_priority": by_priority,
         "by_category": by_category,
+        "response": _response_metrics(complaints),
     }
 
 

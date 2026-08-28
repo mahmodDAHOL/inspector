@@ -29,3 +29,4 @@ class Complaint(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
     closed_at = Column(DateTime)
+    first_response_at = Column(DateTime)

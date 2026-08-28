@@ -1,9 +1,9 @@
 <template>
   <div class="bar-chart">
     <div v-for="(value, key) in normalizedData" :key="key" class="bar-row">
-      <span class="bar-label">{{ key }}</span>
+      <span class="bar-label">{{ labels[key] || key }}</span>
       <div class="bar-track">
-        <div class="bar-fill" :style="{ width: value.percent + '%' }"></div>
+        <div class="bar-fill" :style="{ width: value.percent + '%', background: value.color }"></div>
       </div>
       <span class="bar-value">{{ value.count }}</span>
     </div>
@@ -14,7 +14,11 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  data: { type: Object, default: () => ({}) }
+  data: { type: Object, default: () => ({}) },
+  // optional key -> CSS color, falls back to the theme primary color
+  colors: { type: Object, default: () => ({}) },
+  // optional key -> display label
+  labels: { type: Object, default: () => ({}) }
 })
 
 const normalizedData = computed(() => {
@@ -22,7 +26,7 @@ const normalizedData = computed(() => {
   const max = Math.max(...entries.map(([, v]) => v), 1)
   const result = {}
   entries.forEach(([key, count]) => {
-    result[key] = { count, percent: (count / max) * 100 }
+    result[key] = { count, percent: (count / max) * 100, color: props.colors[key] || 'var(--color-primary)' }
   })
   return result
 })

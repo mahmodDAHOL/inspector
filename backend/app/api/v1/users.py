@@ -2,16 +2,18 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel, UUID4, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.models import User, Department
-from app.core.security import get_password_hash, generate_totp_secret
+from app.core.security import get_password_hash, generate_totp_secret, validate_password_strength
 from app.core.encryption import get_encryption_service
+from app.core.deps import get_current_user, require_roles
+from app.core.activity_log import log_activity
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 enc = get_encryption_service()
 
 ROLES = ["super_admin", "admin", "senior_inspector", "inspector", "viewer"]
@@ -25,6 +27,11 @@ class UserCreate(BaseModel):
     role: str
     password: str
     department_id: Optional[UUID4] = None
+
+    @field_validator("password")
+    @classmethod
+    def _validate_password(cls, value: str) -> str:
+        return validate_password_strength(value)
 
 
 class UserUpdate(BaseModel):
@@ -58,9 +65,10 @@ async def list_roles():
 
 
 @router.get("", response_model=List[UserResponse])
-async def list_users(db: AsyncSession = Depends(get_db)):
-    """List all users (Admin only)"""
-    result = await db.execute(select(User).order_by(User.created_at.desc()))
+async def list_users(limit: int = 200, offset: int = 0, db: AsyncSession = Depends(get_db)):
+    """List users, capped and paginated (default page size 200)"""
+    query = select(User).order_by(User.created_at.desc()).offset(max(offset, 0)).limit(min(max(limit, 1), 500))
+    result = await db.execute(query)
     users = result.scalars().all()
     return [
         {
@@ -99,8 +107,12 @@ async def get_user(user_id: UUID4, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
-    """Create new user"""
+async def create_user(
+    user: UserCreate,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(require_roles("admin", "super_admin")),
+):
+    """Create new user (admin only)"""
     existing = await db.execute(select(User).where(User.username == user.username))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists")
@@ -123,6 +135,8 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
         totp_secret=enc.encrypt(generate_totp_secret(), context="totp_secret"),
     )
     db.add(new_user)
+    await db.flush()
+    await log_activity(db, "user", "user_created", f"User '{new_user.username}' created with role {new_user.role}", performed_by=_admin.id, entity_id=new_user.id)
     await db.commit()
     await db.refresh(new_user)
     return {
@@ -139,12 +153,20 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
 
 
 @router.patch("/{user_id}", response_model=UserResponse)
-async def update_user(user_id: UUID4, update: UserUpdate, db: AsyncSession = Depends(get_db)):
-    """Update user"""
+async def update_user(
+    user_id: UUID4,
+    update: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(require_roles("admin", "super_admin")),
+):
+    """Update user (admin only)"""
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    old_role = user.role
+    old_active = user.is_active
 
     if update.full_name_ar is not None:
         user.full_name_ar = update.full_name_ar
@@ -158,6 +180,14 @@ async def update_user(user_id: UUID4, update: UserUpdate, db: AsyncSession = Dep
         user.is_active = update.is_active
     if update.department_id is not None:
         user.department_id = update.department_id
+
+    changes = []
+    if update.role is not None and update.role != old_role:
+        changes.append(f"role {old_role} -> {update.role}")
+    if update.is_active is not None and update.is_active != old_active:
+        changes.append("activated" if update.is_active else "deactivated")
+    description = f"User '{user.username}' updated ({', '.join(changes)})" if changes else f"User '{user.username}' profile updated"
+    await log_activity(db, "user", "user_updated", description, performed_by=_admin.id, entity_id=user.id)
 
     await db.commit()
     await db.refresh(user)
@@ -175,12 +205,17 @@ async def update_user(user_id: UUID4, update: UserUpdate, db: AsyncSession = Dep
 
 
 @router.post("/{user_id}/deactivate")
-async def deactivate_user(user_id: UUID4, db: AsyncSession = Depends(get_db)):
-    """Deactivate user"""
+async def deactivate_user(
+    user_id: UUID4,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(require_roles("admin", "super_admin")),
+):
+    """Deactivate user (admin only)"""
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     user.is_active = False
+    await log_activity(db, "user", "user_deactivated", f"User '{user.username}' deactivated", performed_by=_admin.id, entity_id=user.id)
     await db.commit()
     return {"message": "User deactivated", "user_id": str(user_id)}

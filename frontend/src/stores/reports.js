@@ -8,13 +8,16 @@ export const useReportsStore = defineStore('reports', () => {
 
   async function generateSummary(fromDate, toDate) {
     loading.value = true
-    const res = await api.post('/reports/summary', {
-      from_date: fromDate || null,
-      to_date: toDate || null,
-    })
-    report.value = res.data
-    loading.value = false
-    return res.data
+    try {
+      const res = await api.post('/reports/summary', {
+        from_date: fromDate || null,
+        to_date: toDate || null,
+      })
+      report.value = res.data
+      return res.data
+    } finally {
+      loading.value = false
+    }
   }
 
   function downloadJson() {

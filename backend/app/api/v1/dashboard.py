@@ -8,8 +8,34 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.models import Complaint
+from app.core.deps import get_current_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
+
+
+def _response_metrics(complaints: List[Complaint]) -> dict:
+    """Response-time SLA metrics: how many complaints have been acted on, and how fast"""
+    total = len(complaints)
+    responded = [c for c in complaints if c.first_response_at is not None]
+    awaiting = total - len(responded)
+    response_rate = round(len(responded) / total * 100, 1) if total else 0.0
+
+    if responded:
+        hours = [
+            (c.first_response_at - c.created_at).total_seconds() / 3600
+            for c in responded
+            if c.created_at
+        ]
+        avg_response_hours = round(sum(hours) / len(hours), 1) if hours else 0.0
+    else:
+        avg_response_hours = 0.0
+
+    return {
+        "responded": len(responded),
+        "awaiting_response": awaiting,
+        "response_rate": response_rate,
+        "avg_response_hours": avg_response_hours,
+    }
 
 
 class StatCard(BaseModel):
@@ -26,6 +52,7 @@ class DashboardStats(BaseModel):
     by_status: dict
     by_priority: dict
     by_category: dict
+    response: dict
     recent: List[dict]
 
 
@@ -58,6 +85,7 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
         "by_status": by_status,
         "by_priority": by_priority,
         "by_category": by_category,
+        "response": _response_metrics(complaints),
         "recent": [
             {
                 "id": str(c.id),
