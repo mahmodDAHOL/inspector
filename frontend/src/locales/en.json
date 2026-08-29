@@ -59,16 +59,35 @@
       "urgent": "Urgent",
       "critical": "Critical"
     },
-    "category": {
-      "financial_fraud": "Financial Fraud",
+    "categories": {
+      "financial_fraud": "Financial Fraud / Embezzlement",
       "procurement_violation": "Procurement Violation",
-      "bribery": "Bribery",
-      "misconduct": "Misconduct"
+      "abuse_of_power": "Abuse of Power",
+      "bribery": "Bribery / Kickbacks",
+      "embezzlement": "Misuse of Public Funds",
+      "nepotism": "Nepotism / Favoritism",
+      "document_forgery": "Document Forgery",
+      "misconduct": "Misconduct",
+      "other": "Other"
     },
     "titleArPlaceholder": "Title (Arabic)",
     "titleEnPlaceholder": "Title (English) — optional",
-    "descriptionPlaceholder": "Description",
-    "selectCategory": "Select Category",
+    "descriptionPlaceholder": "Description — explain in detail what happened, when, where, and who was involved...",
+    "selectCategory": "Select violation type",
+    "complaintInfoSection": "1. Complaint Details",
+    "complainantInfoSection": "2. Complainant Information",
+    "confirmationSection": "3. Confirmation",
+    "anonymousLabel": "I want to submit this complaint anonymously (my personal information will not be requested)",
+    "complainantName": "Full Name",
+    "complainantNamePlaceholder": "Full name",
+    "complainantPhone": "Phone Number",
+    "complainantPhonePlaceholder": "+9639XXXXXXXX",
+    "complainantEmail": "Email",
+    "complainantEmailPlaceholder": "Your email address",
+    "confirmationLabel": "I confirm that all information provided is accurate, and I take full legal responsibility for it",
+    "attachmentsSection": "Attachments & Evidence",
+    "attachmentsComingSoon": "File attachments aren't supported yet — coming in a future update. Please mention any evidence you have in the description above.",
+    "submitNotice": "All submitted data is encrypted (AES-256-GCM). Filing a false complaint is subject to legal liability.",
     "activityLog": "Activity Log",
     "noActivity": "No activity recorded yet.",
     "unknownUser": "System",
@@ -156,12 +175,21 @@
       "inspector": "Inspector",
       "viewer": "Viewer"
     },
-    "permissions": {
-      "super_admin": ["Full system access", "Manage users & departments", "Manage roles"],
-      "admin": ["Manage users", "Manage departments", "View reports", "Manage complaints"],
-      "senior_inspector": ["Assign complaints", "Sign reports", "Manage investigations"],
-      "inspector": ["View complaints", "Add notes", "Update status"],
-      "viewer": ["Read-only access"]
+    "permissionLabels": {
+      "fullAccess": "Full system access",
+      "manageUsersDepts": "Manage users & departments",
+      "manageRoles": "Manage roles",
+      "manageUsers": "Manage users",
+      "manageDepartments": "Manage departments",
+      "viewReports": "View reports",
+      "manageComplaints": "Manage complaints",
+      "assignComplaints": "Assign complaints",
+      "signReports": "Sign reports",
+      "manageInvestigations": "Manage investigations",
+      "viewComplaints": "View complaints",
+      "addNotes": "Add notes",
+      "updateStatus": "Update status",
+      "readOnly": "Read-only access"
     }
   },
   "audit": {

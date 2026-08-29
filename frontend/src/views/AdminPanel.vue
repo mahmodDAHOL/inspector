@@ -54,7 +54,7 @@
           <div v-for="role in usersStore.roles" :key="role" class="role-card">
             <h3>{{ $t(`admin.roleLabels.${role}`) }}</h3>
             <ul>
-              <li v-for="perm in $tm(`admin.permissions.${role}`)" :key="perm">{{ perm }}</li>
+              <li v-for="perm in rolePermissions[role]" :key="perm">{{ perm }}</li>
             </ul>
           </div>
         </div>
@@ -194,6 +194,21 @@ const tabs = computed(() => [
   { key: 'departments', label: t('admin.departments') },
   { key: 'system', label: t('admin.system') },
 ])
+
+const rolePermissionKeys = {
+  super_admin: ['fullAccess', 'manageUsersDepts', 'manageRoles'],
+  admin: ['manageUsers', 'manageDepartments', 'viewReports', 'manageComplaints'],
+  senior_inspector: ['assignComplaints', 'signReports', 'manageInvestigations'],
+  inspector: ['viewComplaints', 'addNotes', 'updateStatus'],
+  viewer: ['readOnly'],
+}
+const rolePermissions = computed(() => {
+  const result = {}
+  for (const [role, keys] of Object.entries(rolePermissionKeys)) {
+    result[role] = keys.map(key => t(`admin.permissionLabels.${key}`))
+  }
+  return result
+})
 
 const form = reactive({
   username: '',

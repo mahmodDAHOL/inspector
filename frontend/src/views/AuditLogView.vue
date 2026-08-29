@@ -7,11 +7,11 @@
       <div class="filters">
         <select v-model="filterTable" @change="reload">
           <option value="">{{ $t('audit.filterTable') }}</option>
-          <option v-for="key in Object.keys($tm('audit.entity'))" :key="key" :value="key">{{ $t(`audit.entity.${key}`) }}</option>
+          <option v-for="key in entityKeys" :key="key" :value="key">{{ $t(`audit.entity.${key}`) }}</option>
         </select>
         <select v-model="filterAction" @change="reload">
           <option value="">{{ $t('audit.filterAction') }}</option>
-          <option v-for="key in Object.keys($tm('audit.actions'))" :key="key" :value="key">{{ $t(`audit.actions.${key}`) }}</option>
+          <option v-for="key in actionKeys" :key="key" :value="key">{{ $t(`audit.actions.${key}`) }}</option>
         </select>
       </div>
 
@@ -103,6 +103,14 @@ const store = useAuditStore()
 const filterTable = ref('')
 const filterAction = ref('')
 const selectedLog = ref(null)
+
+const entityKeys = ['complaint', 'auth', 'user', 'department', 'report']
+const actionKeys = [
+  'created', 'status_changed', 'assigned', 'escalated', 'note_added', 'signed',
+  'login_success', 'login_failed', 'account_locked', 'mfa_failed',
+  'user_created', 'user_updated', 'user_deactivated',
+  'department_created', 'department_updated', 'report_generated',
+]
 
 function formatDate(value) {
   if (!value) return ''

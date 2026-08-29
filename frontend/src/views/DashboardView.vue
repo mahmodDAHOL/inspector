@@ -126,10 +126,15 @@ const priorityLabels = computed(() => ({
   critical: t('complaint.priority.critical'),
 }))
 const categoryLabels = computed(() => ({
-  financial_fraud: t('complaint.category.financial_fraud'),
-  procurement_violation: t('complaint.category.procurement_violation'),
-  bribery: t('complaint.category.bribery'),
-  misconduct: t('complaint.category.misconduct'),
+  financial_fraud: t('complaint.categories.financial_fraud'),
+  procurement_violation: t('complaint.categories.procurement_violation'),
+  abuse_of_power: t('complaint.categories.abuse_of_power'),
+  bribery: t('complaint.categories.bribery'),
+  embezzlement: t('complaint.categories.embezzlement'),
+  nepotism: t('complaint.categories.nepotism'),
+  document_forgery: t('complaint.categories.document_forgery'),
+  misconduct: t('complaint.categories.misconduct'),
+  other: t('complaint.categories.other'),
 }))
 </script>
 

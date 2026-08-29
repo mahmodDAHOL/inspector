@@ -59,16 +59,35 @@
       "urgent": "عاجلة",
       "critical": "حرجة"
     },
-    "category": {
-      "financial_fraud": "إهدار مالي",
-      "procurement_violation": "مخالفة في التعاقد",
-      "bribery": "رشوة",
-      "misconduct": "سوء سلوك وظيفي"
+    "categories": {
+      "financial_fraud": "تلاعب مالي / اختلاس",
+      "procurement_violation": "مخالفة مشتريات / تعاقد",
+      "abuse_of_power": "استغلال نفوذ وظيفي",
+      "bribery": "رشوة / عمولات",
+      "embezzlement": "اختلاس أموال عامة",
+      "nepotism": "محسوبية / واسطة",
+      "document_forgery": "تزوير مستندات رسمية",
+      "misconduct": "سوء سلوك وظيفي",
+      "other": "أخرى"
     },
     "titleArPlaceholder": "العنوان (بالعربية)",
     "titleEnPlaceholder": "العنوان (بالإنجليزية) — اختياري",
-    "descriptionPlaceholder": "الوصف",
-    "selectCategory": "اختر الفئة",
+    "descriptionPlaceholder": "اشرح بالتفصيل ما حدث، متى، أين، ومن المتورطون...",
+    "selectCategory": "اختر نوع المخالفة",
+    "complaintInfoSection": "١. معلومات الشكوى",
+    "complainantInfoSection": "٢. معلومات المُبلّغ",
+    "confirmationSection": "٣. التأكيد",
+    "anonymousLabel": "أرغب في تقديم الشكوى بشكل مجهول (لن يتم طلب بياناتي الشخصية)",
+    "complainantName": "الاسم الكامل",
+    "complainantNamePlaceholder": "الاسم الثلاثي",
+    "complainantPhone": "رقم الهاتف",
+    "complainantPhonePlaceholder": "+9639XXXXXXXX",
+    "complainantEmail": "البريد الإلكتروني",
+    "complainantEmailPlaceholder": "بريدك الإلكتروني",
+    "confirmationLabel": "أؤكد أن جميع المعلومات المقدمة صحيحة، وأتحمل المسؤولية القانونية الكاملة عنها",
+    "attachmentsSection": "المرفقات والأدلة",
+    "attachmentsComingSoon": "رفع المرفقات غير مدعوم بعد — سيُضاف في تحديث لاحق. يرجى ذكر أي أدلة متوفرة لديك ضمن الوصف أعلاه.",
+    "submitNotice": "جميع البيانات المُقدَّمة تُشفَّر (AES-256-GCM). تقديم شكوى كاذبة يعرّض صاحبها للمساءلة القانونية.",
     "activityLog": "سجل الأنشطة",
     "noActivity": "لا يوجد نشاط مسجل بعد.",
     "unknownUser": "النظام",
@@ -156,12 +175,21 @@
       "inspector": "مفتش",
       "viewer": "مُطّلع"
     },
-    "permissions": {
-      "super_admin": ["صلاحية كاملة على النظام", "إدارة المستخدمين والإدارات", "إدارة الأدوار"],
-      "admin": ["إدارة المستخدمين", "إدارة الإدارات", "عرض التقارير", "إدارة الشكاوى"],
-      "senior_inspector": ["تعيين الشكاوى", "توقيع التقارير", "إدارة التحقيقات"],
-      "inspector": ["عرض الشكاوى", "إضافة ملاحظات", "تحديث الحالة"],
-      "viewer": ["وصول للقراءة فقط"]
+    "permissionLabels": {
+      "fullAccess": "صلاحية كاملة على النظام",
+      "manageUsersDepts": "إدارة المستخدمين والإدارات",
+      "manageRoles": "إدارة الأدوار",
+      "manageUsers": "إدارة المستخدمين",
+      "manageDepartments": "إدارة الإدارات",
+      "viewReports": "عرض التقارير",
+      "manageComplaints": "إدارة الشكاوى",
+      "assignComplaints": "تعيين الشكاوى",
+      "signReports": "توقيع التقارير",
+      "manageInvestigations": "إدارة التحقيقات",
+      "viewComplaints": "عرض الشكاوى",
+      "addNotes": "إضافة ملاحظات",
+      "updateStatus": "تحديث الحالة",
+      "readOnly": "وصول للقراءة فقط"
     }
   },
   "audit": {

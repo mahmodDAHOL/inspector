@@ -14,7 +14,7 @@
 
         <div class="detail-meta">
           <p><strong>{{ $t('complaint.number') }}:</strong> {{ store.currentComplaint.complaint_number }}</p>
-          <p><strong>{{ $t('complaint.category') }}:</strong> {{ $t(`complaint.category.${store.currentComplaint.category}`) }}</p>
+          <p><strong>{{ $t('complaint.category') }}:</strong> {{ $t(`complaint.categories.${store.currentComplaint.category}`) }}</p>
           <p><strong>{{ $t('complaint.source') }}:</strong> {{ store.currentComplaint.source }}</p>
           <p><strong>{{ $t('complaint.createdAt') }}:</strong> {{ formatDate(store.currentComplaint.created_at) }}</p>
         </div>
