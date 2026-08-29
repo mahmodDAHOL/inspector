@@ -1,5 +1,5 @@
 {
-  "login": { "title": "Secure Login", "subtitle": "Inspection Directorate", "next": "Next", "verify": "Verify" },
+  "login": { "title": "Secure Login", "subtitle": "Inspection Directorate", "next": "Next", "verify": "Verify", "otpHint": "Enter the 6-digit code from your authenticator app" },
   "dashboard": {
     "title": "Dashboard",
     "newComplaint": "New Complaint",
@@ -59,6 +59,16 @@
       "urgent": "Urgent",
       "critical": "Critical"
     },
+    "category": {
+      "financial_fraud": "Financial Fraud",
+      "procurement_violation": "Procurement Violation",
+      "bribery": "Bribery",
+      "misconduct": "Misconduct"
+    },
+    "titleArPlaceholder": "Title (Arabic)",
+    "titleEnPlaceholder": "Title (English) — optional",
+    "descriptionPlaceholder": "Description",
+    "selectCategory": "Select Category",
     "activityLog": "Activity Log",
     "noActivity": "No activity recorded yet.",
     "unknownUser": "System",
@@ -71,7 +81,14 @@
       "signed": "Report Signed"
     }
   },
-  "common": { "save": "Save", "cancel": "Cancel", "back": "Back", "all": "All", "manage": "Manage", "comingSoon": "Coming Soon", "loading": "Loading...", "error": "Something went wrong", "none": "None", "close": "Close" },
+  "common": {
+    "save": "Save", "cancel": "Cancel", "back": "Back", "all": "All", "manage": "Manage",
+    "comingSoon": "Coming Soon", "loading": "Loading...", "error": "Something went wrong",
+    "none": "None", "close": "Close", "goHome": "Go Home", "pageNotFound": "Page not found",
+    "loginFailed": "Login failed", "verificationFailed": "Verification failed",
+    "actionFailed": "Action failed", "signingFailed": "Signing failed", "saveFailed": "Save failed",
+    "lightMode": "Light mode", "darkMode": "Dark mode", "username": "Username", "password": "Password"
+  },
   "reports": {
     "title": "Reports",
     "summary": "Complaints Summary",
@@ -131,7 +148,21 @@
     "totalDepartments": "Total Departments",
     "totalComplaints": "Total Complaints",
     "auditRetention": "Audit Log Retention",
-    "auditRetentionValue": "7 years"
+    "auditRetentionValue": "7 years",
+    "roleLabels": {
+      "super_admin": "Super Admin",
+      "admin": "Admin",
+      "senior_inspector": "Senior Inspector",
+      "inspector": "Inspector",
+      "viewer": "Viewer"
+    },
+    "permissions": {
+      "super_admin": ["Full system access", "Manage users & departments", "Manage roles"],
+      "admin": ["Manage users", "Manage departments", "View reports", "Manage complaints"],
+      "senior_inspector": ["Assign complaints", "Sign reports", "Manage investigations"],
+      "inspector": ["View complaints", "Add notes", "Update status"],
+      "viewer": ["Read-only access"]
+    }
   },
   "audit": {
     "title": "Audit Log",

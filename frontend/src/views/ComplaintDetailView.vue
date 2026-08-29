@@ -14,7 +14,7 @@
 
         <div class="detail-meta">
           <p><strong>{{ $t('complaint.number') }}:</strong> {{ store.currentComplaint.complaint_number }}</p>
-          <p><strong>{{ $t('complaint.category') }}:</strong> {{ store.currentComplaint.category }}</p>
+          <p><strong>{{ $t('complaint.category') }}:</strong> {{ $t(`complaint.category.${store.currentComplaint.category}`) }}</p>
           <p><strong>{{ $t('complaint.source') }}:</strong> {{ store.currentComplaint.source }}</p>
           <p><strong>{{ $t('complaint.createdAt') }}:</strong> {{ formatDate(store.currentComplaint.created_at) }}</p>
         </div>
@@ -107,6 +107,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppLayout from '../components/AppLayout.vue'
 import { useComplaintStore } from '../stores/complaints'
 import { useUsersStore } from '../stores/users'
@@ -114,6 +115,7 @@ import { useUsersStore } from '../stores/users'
 const route = useRoute()
 const store = useComplaintStore()
 const usersStore = useUsersStore()
+const { t } = useI18n()
 
 const nextStatus = ref('')
 const selectedUser = ref('')
@@ -165,7 +167,7 @@ async function changeStatus() {
     nextStatus.value = ''
     store.fetchHistory(route.params.id)
   } catch (e) {
-    actionError.value = e.response?.data?.detail || 'Action failed'
+    actionError.value = e.response?.data?.detail || t('common.actionFailed')
   }
 }
 
@@ -175,7 +177,7 @@ async function escalate() {
     await store.escalate(route.params.id)
     store.fetchHistory(route.params.id)
   } catch (e) {
-    actionError.value = e.response?.data?.detail || 'Action failed'
+    actionError.value = e.response?.data?.detail || t('common.actionFailed')
   }
 }
 
@@ -186,7 +188,7 @@ async function assign() {
     selectedUser.value = ''
     store.fetchHistory(route.params.id)
   } catch (e) {
-    actionError.value = e.response?.data?.detail || 'Action failed'
+    actionError.value = e.response?.data?.detail || t('common.actionFailed')
   }
 }
 
@@ -199,7 +201,7 @@ async function addNote() {
     noteConfidential.value = false
     store.fetchHistory(route.params.id)
   } catch (e) {
-    actionError.value = e.response?.data?.detail || 'Action failed'
+    actionError.value = e.response?.data?.detail || t('common.actionFailed')
   }
 }
 
@@ -212,7 +214,7 @@ async function sign() {
     signTotp.value = ''
     store.fetchHistory(route.params.id)
   } catch (e) {
-    signError.value = e.response?.data?.detail || 'Signing failed'
+    signError.value = e.response?.data?.detail || t('common.signingFailed')
   } finally {
     signing.value = false
   }

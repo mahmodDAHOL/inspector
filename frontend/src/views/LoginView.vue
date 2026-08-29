@@ -10,15 +10,15 @@
 
       <div v-if="step === 'credentials'">
         <form @submit.prevent="submitCredentials">
-          <input v-model="form.username" type="text" placeholder="Username" required />
-          <input v-model="form.password" type="password" placeholder="Password" required />
+          <input v-model="form.username" type="text" :placeholder="$t('common.username')" required />
+          <input v-model="form.password" type="password" :placeholder="$t('common.password')" required />
           <p v-if="error" class="error">{{ error }}</p>
           <button type="submit" class="btn-primary" :disabled="submitting">{{ $t('login.next') }}</button>
         </form>
       </div>
 
       <div v-else>
-        <p>Enter 6-digit code from authenticator</p>
+        <p>{{ $t('login.otpHint') }}</p>
         <div class="otp-inputs">
           <input v-for="i in 6" :key="i" v-model="totpDigits[i-1]" maxlength="1" class="otp-digit" />
         </div>
@@ -32,10 +32,12 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const auth = useAuthStore()
+const { t } = useI18n()
 const step = ref('credentials')
 const form = reactive({ username: '', password: '' })
 const totpDigits = reactive(['', '', '', '', '', ''])
@@ -49,7 +51,7 @@ async function submitCredentials() {
     await auth.login(form.username, form.password)
     step.value = 'mfa'
   } catch (e) {
-    error.value = e.response?.data?.detail || 'Login failed'
+    error.value = e.response?.data?.detail || t('common.loginFailed')
   } finally {
     submitting.value = false
   }
@@ -62,7 +64,7 @@ async function verify() {
     await auth.verifyTOTP(totpDigits.join(''))
     router.push('/dashboard')
   } catch (e) {
-    error.value = e.response?.data?.detail || 'Verification failed'
+    error.value = e.response?.data?.detail || t('common.verificationFailed')
   } finally {
     submitting.value = false
   }

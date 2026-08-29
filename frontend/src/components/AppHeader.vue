@@ -7,7 +7,7 @@
       </router-link>
     </div>
     <div class="header-right">
-      <button class="theme-toggle" @click="toggleTheme" :title="isDark ? 'Light mode' : 'Dark mode'">
+      <button class="theme-toggle" @click="toggleTheme" :title="isDark ? $t('common.lightMode') : $t('common.darkMode')">
         {{ isDark ? '☀️' : '🌙' }}
       </button>
     </div>

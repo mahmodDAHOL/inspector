@@ -63,7 +63,7 @@
           </div>
           <div class="chart-card">
             <h3>{{ $t('dashboard.byCategory') }}</h3>
-            <SimpleBarChart :data="store.report.by_category" />
+            <SimpleBarChart :data="store.report.by_category" :labels="categoryLabels" />
           </div>
         </div>
       </div>
@@ -107,6 +107,12 @@ const priorityLabels = computed(() => ({
   normal: t('complaint.priority.normal'),
   urgent: t('complaint.priority.urgent'),
   critical: t('complaint.priority.critical'),
+}))
+const categoryLabels = computed(() => ({
+  financial_fraud: t('complaint.category.financial_fraud'),
+  procurement_violation: t('complaint.category.procurement_violation'),
+  bribery: t('complaint.category.bribery'),
+  misconduct: t('complaint.category.misconduct'),
 }))
 
 function formatDate(value) {

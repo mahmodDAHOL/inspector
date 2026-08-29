@@ -1,8 +1,8 @@
 <template>
   <div class="not-found">
     <h1>404</h1>
-    <p>Page not found</p>
-    <button @click="$router.push('/')">Go Home</button>
+    <p>{{ $t('common.pageNotFound') }}</p>
+    <button @click="$router.push('/')">{{ $t('common.goHome') }}</button>
   </div>
 </template>
 

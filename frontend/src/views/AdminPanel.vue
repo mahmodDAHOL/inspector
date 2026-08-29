@@ -35,7 +35,7 @@
             <tr v-for="user in usersStore.users" :key="user.id">
               <td>{{ user.username }}</td>
               <td>{{ user.full_name_ar }}</td>
-              <td><span class="badge">{{ user.role }}</span></td>
+              <td><span class="badge">{{ $t(`admin.roleLabels.${user.role}`) }}</span></td>
               <td>{{ departmentName(user.department_id) }}</td>
               <td><span :class="['badge', user.is_active ? 'closed' : 'escalated']">{{ user.is_active ? $t('admin.active') : $t('admin.inactive') }}</span></td>
               <td>
@@ -52,9 +52,9 @@
         <p class="hint">{{ $t('admin.rolesNote') }}</p>
         <div class="roles-grid">
           <div v-for="role in usersStore.roles" :key="role" class="role-card">
-            <h3>{{ role }}</h3>
+            <h3>{{ $t(`admin.roleLabels.${role}`) }}</h3>
             <ul>
-              <li v-for="perm in rolePermissions[role]" :key="perm">{{ perm }}</li>
+              <li v-for="perm in $tm(`admin.permissions.${role}`)" :key="perm">{{ perm }}</li>
             </ul>
           </div>
         </div>
@@ -125,7 +125,7 @@
             <input v-model="form.email" type="email" :placeholder="$t('admin.email')" required />
             <select v-model="form.role" required>
               <option value="">{{ $t('admin.selectRole') }}</option>
-              <option v-for="role in usersStore.roles" :key="role" :value="role">{{ role }}</option>
+              <option v-for="role in usersStore.roles" :key="role" :value="role">{{ $t(`admin.roleLabels.${role}`) }}</option>
             </select>
             <select v-model="form.department_id">
               <option value="">{{ $t('admin.selectDepartment') }}</option>
@@ -194,14 +194,6 @@ const tabs = computed(() => [
   { key: 'departments', label: t('admin.departments') },
   { key: 'system', label: t('admin.system') },
 ])
-
-const rolePermissions = {
-  super_admin: ['Full system access', 'Manage users & departments', 'Manage roles'],
-  admin: ['Manage users', 'Manage departments', 'View reports', 'Manage complaints'],
-  senior_inspector: ['Assign complaints', 'Sign reports', 'Manage investigations'],
-  inspector: ['View complaints', 'Add notes', 'Update status'],
-  viewer: ['Read-only access'],
-}
 
 const form = reactive({
   username: '',
@@ -286,7 +278,7 @@ async function saveUser() {
     }
     closeForm()
   } catch (e) {
-    formError.value = e.response?.data?.detail || 'Save failed'
+    formError.value = e.response?.data?.detail || t('common.saveFailed')
   }
 }
 
@@ -329,7 +321,7 @@ async function saveDept() {
     }
     closeDeptForm()
   } catch (e) {
-    deptFormError.value = e.response?.data?.detail || 'Save failed'
+    deptFormError.value = e.response?.data?.detail || t('common.saveFailed')
   }
 }
 </script>

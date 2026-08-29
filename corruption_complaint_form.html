@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نموذج شكوى الفساد — بوابة الإعلام</title>
+  <style>
+    :root {
+      --primary: #1B5E5E;
+      --gold: #A68B5B;
+      --bg: #F5F5F0;
+      --text: #1a1a1a;
+      --border: #d4d0c8;
+      --danger: #B85450;
+      --warning: #C4943A;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+    .header {
+      text-align: center;
+      padding: 30px 0;
+      border-bottom: 3px solid var(--primary);
+      margin-bottom: 30px;
+    }
+    .logo {
+      width: 80px; height: 80px;
+      background: var(--primary);
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      margin: 0 auto 16px;
+    }
+    .header h1 { font-size: 22px; color: var(--primary); margin-bottom: 4px; }
+    .header h2 { font-size: 16px; color: var(--gold); font-weight: normal; }
+    .header .subtitle { font-size: 13px; color: #666; margin-top: 8px; }
+
+    .notice {
+      background: color-mix(in srgb, var(--danger) 8%, transparent);
+      border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .notice h3 { color: var(--danger); font-size: 14px; margin-bottom: 8px; }
+    .notice ul { font-size: 13px; color: #555; padding-right: 20px; }
+    .notice li { margin-bottom: 4px; }
+
+    .form-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+    .form-section h3 {
+      font-size: 16px;
+      color: var(--primary);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--gold);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 13px; font-weight: 500; color: #333; }
+    label .required { color: var(--danger); }
+    input, select, textarea {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fafafa;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: #f9f9f7;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px; height: 18px;
+      accent-color: var(--primary);
+    }
+    .checkbox-group label { font-size: 14px; margin: 0; }
+
+    .file-upload {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .file-upload:hover {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 3%, transparent);
+    }
+    .file-upload input { display: none; }
+    .file-upload-icon { font-size: 32px; margin-bottom: 8px; }
+    .file-upload-text { font-size: 13px; color: #666; }
+
+    .submit-section {
+      text-align: center;
+      padding: 30px 0;
+    }
+    .btn-submit {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px 48px;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-submit:hover { opacity: 0.9; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .security-footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #888;
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+    }
+    .security-footer span { display: inline-flex; align-items: center; gap: 6px; }
+
+    .success-message {
+      display: none;
+      background: color-mix(in srgb, #4CAF50 10%, transparent);
+      border: 1px solid #4CAF50;
+      border-radius: 10px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .success-message.show { display: block; }
+    .success-message h3 { color: #2E7D32; margin-bottom: 8px; }
+    .success-message .ref-number {
+      font-family: monospace;
+      font-size: 18px;
+      background: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">م</div>
+      <h1>نموذج شكوى الفساد والمخالفات الإدارية</h1>
+      <h2>مديرية الرقابة والتفتيش — وزارة الإعلام</h2>
+      <p class="subtitle">Corruption & Administrative Violations Complaint Form — Inspection Directorate</p>
+    </div>
+
+    <div class="success-message" id="successMsg">
+      <h3>✅ تم استلام شكواك بنجاح</h3>
+      <p>رقم مرجع الشكوى:</p>
+      <div class="ref-number" id="refNumber">INS-2026-0891</div>
+      <p style="margin-top:12px; font-size:13px; color:#666;">سيتم مراجعة شكواك والتحقق منها خلال 48 ساعة</p>
+    </div>
+
+    <div class="notice">
+      <h3>⚠️ تنبيه هام</h3>
+      <ul>
+        <li>جميع البيانات المقدمة مشفرة وآمنة (AES-256-GCM)</li>
+        <li>يمكنك تقديم الشكوى بشكل مجهول إذا كنت تخشى على سلامتك</li>
+        <li>تقديم شكوى كاذبة يعرضك للمساءلة القانونية</li>
+        <li>سجل التدقيق يُحفظ لمدة 7 سنوات وفق المعايير الدولية</li>
+      </ul>
+    </div>
+
+    <form id="corruptionForm" onsubmit="return submitForm(event)">
+      <!-- Section 1: Complaint Type -->
+      <div class="form-section">
+        <h3>١. معلومات الشكوى</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>نوع المخالفة <span class="required">*</span></label>
+            <select name="category" required>
+              <option value="">اختر نوع المخالفة</option>
+              <option value="financial_fraud">تلاعب مالي / اختلاس</option>
+              <option value="procurement_violation">مخالفة مشتريات / تعاقد</option>
+              <option value="abuse_of_power">استغلال نفوذ وظيفي</option>
+              <option value="bribery">رشوة / عمولات</option>
+              <option value="embezzlement">اختلاس أموال عامة</option>
+              <option value="nepotism">محسوبية / واسطة</option>
+              <option value="document_forgery">تزوير مستندات رسمية</option>
+              <option value="other">أخرى</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>درجة الخطورة <span class="required">*</span></label>
+            <select name="priority" required>
+              <option value="normal">عادية</option>
+              <option value="urgent">عاجلة</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <label>عنوان الشكوى <span class="required">*</span></label>
+          <input type="text" name="title_ar" placeholder="اكتب عنواناً موجزاً للشكوى" required />
+        </div>
+
+        <div class="form-group full">
+          <label>تفاصيل الشكوى <span class="required">*</span></label>
+          <textarea name="description" placeholder="اشرح بالتفصيل ما حدث، متى، وأين، ومن المتورطين..." required></textarea>
+        </div>
+      </div>
+
+      <!-- Section 2: Complainant Info -->
+      <div class="form-section">
+        <h3>٢. معلومات المُبلّغ</h3>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="anonymous" name="is_anonymous" onchange="toggleAnonymous()" />
+          <label for="anonymous">أرغب في تقديم الشكوى بشكل مجهول (لن يتم طلب بياناتي الشخصية)</label>
+        </div>
+
+        <div id="complainantFields">
+          <div class="form-row">
+            <div class="form-group">
+              <label>الاسم الكامل</label>
+              <input type="text" name="complainant_name" placeholder="الاسم الثلاثي" />
+            </div>
+            <div class="form-group">
+              <label>رقم الهاتف</label>
+              <input type="tel" name="complainant_phone" placeholder="+9639XXXXXXXX" />
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>البريد الإلكتروني</label>
+            <input type="email" name="complainant_email" placeholder="example@email.com" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Evidence -->
+      <div class="form-section">
+        <h3>٣. المرفقات والأدلة</h3>
+        <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleFiles(this)" />
+          <div class="file-upload-icon">📎</div>
+          <div class="file-upload-text">
+            اضغط لرفع الملفات (PDF, Word, صور)<br>
+            <small>الحد الأقصى: 50 ميجابايت لكل ملف</small>
+          </div>
+        </div>
+        <div id="fileList" style="margin-top:12px;"></div>
+      </div>
+
+      <!-- Section 4: Confirmation -->
+      <div class="form-section">
+        <h3>٤. التأكيد</h3>
+        <div class="checkbox-group">
+          <input type="checkbox" id="confirm" required />
+          <label for="confirm">أؤكد أن جميع المعلومات المقدمة صحيحة وأتحمل المسؤولية القانونية عنها</label>
+        </div>
+      </div>
+
+      <div class="submit-section">
+        <button type="submit" class="btn-submit" id="submitBtn">إرسال الشكوى</button>
+      </div>
+    </form>
+
+    <div class="security-footer">
+      <span>🔒 البيانات مشفرة بتقنية AES-256-GCM |</span>
+      <span> الجمهورية العربية السورية — وزارة الإعلام © 2026</span>
+    </div>
+  </div>
+
+  <script>
+    function toggleAnonymous() {
+      const fields = document.getElementById('complainantFields');
+      const checkbox = document.getElementById('anonymous');
+      fields.style.display = checkbox.checked ? 'none' : 'block';
+    }
+
+    function handleFiles(input) {
+      const list = document.getElementById('fileList');
+      list.innerHTML = '';
+      for (const file of input.files) {
+        const div = document.createElement('div');
+        div.style.cssText = 'padding:8px 12px; background:#f5f5f0; border-radius:6px; margin-bottom:6px; font-size:13px; display:flex; justify-content:space-between;';
+        div.innerHTML = `<span>📄 ${file.name} (${(file.size/1024/1024).toFixed(1)} MB)</span><span style="color:#1B5E5E;">✓</span>`;
+        list.appendChild(div);
+      }
+    }
+
+    async function submitForm(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'جاري الإرسال...';
+
+      // Simulate API call
+      await new Promise(r => setTimeout(r, 2000));
+
+      document.getElementById('corruptionForm').style.display = 'none';
+      document.querySelector('.notice').style.display = 'none';
+      document.getElementById('successMsg').classList.add('show');
+
+      return false;
+    }
+  </script>
+</body>
+</html>
