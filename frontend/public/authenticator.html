@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>مُصادق الرقابة</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B5E5E" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A1614" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مُصادق الرقابة">
+<link rel="apple-touch-icon" id="appleTouchIcon">
+<link rel="icon" id="faviconIcon">
+<link rel="manifest" id="manifestLink">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+
+<style>
+  :root {
+    --ground: #F6F3EC;
+    --surface: #FFFFFF;
+    --surface-2: #EFEAE0;
+    --ink: #12201F;
+    --ink-soft: #4B5B58;
+    --ink-faint: #8A9794;
+    --line: #DCD5C6;
+    --teal: #1B5E5E;
+    --teal-deep: #0E3636;
+    --brass: #A68B5B;
+    --brass-bright: #B8944F;
+    --danger: #B85450;
+    --success: #4C8B5A;
+    --ring-track: #E4DDCC;
+    --shadow: 0 1px 2px rgba(18,32,31,0.06), 0 8px 24px -12px rgba(18,32,31,0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0A1614;
+      --surface: #12211F;
+      --surface-2: #182B28;
+      --ink: #EFEAE0;
+      --ink-soft: #A9B8B4;
+      --ink-faint: #6C7B77;
+      --line: #223634;
+      --teal: #4A9490;
+      --teal-deep: #2E6E6A;
+      --brass: #C9A96B;
+      --brass-bright: #D9B770;
+      --danger: #D97C77;
+      --success: #7FBE8C;
+      --ring-track: #1C2E2B;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0A1614;
+    --surface: #12211F;
+    --surface-2: #182B28;
+    --ink: #EFEAE0;
+    --ink-soft: #A9B8B4;
+    --ink-faint: #6C7B77;
+    --line: #223634;
+    --teal: #4A9490;
+    --teal-deep: #2E6E6A;
+    --brass: #C9A96B;
+    --brass-bright: #D9B770;
+    --danger: #D97C77;
+    --success: #7FBE8C;
+    --ring-track: #1C2E2B;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    min-height: 100vh;
+    direction: rtl;
+  }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+
+  .page {
+    max-width: 460px;
+    margin: 0 auto;
+    padding: 0 0 96px;
+    min-height: 100vh;
+  }
+
+  /* header */
+  header {
+    background: linear-gradient(165deg, var(--teal) 0%, var(--teal-deep) 100%);
+    color: #F6F3EC;
+    padding: 28px 20px 22px;
+    border-radius: 0 0 22px 22px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120px 120px at 88% -10%, rgba(184,148,79,0.35), transparent 70%);
+    pointer-events: none;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+  }
+  .brand-mark {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--brass);
+    color: var(--teal-deep);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Reem Kufi', 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.25);
+  }
+  .brand-text h1 {
+    font-family: 'Reem Kufi', 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 21px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+  .brand-text p {
+    margin: 3px 0 0;
+    font-size: 12.5px;
+    color: rgba(246,243,236,0.72);
+  }
+
+  /* install banner */
+  .install-banner {
+    margin: 16px 16px 0;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--brass) 45%, var(--line));
+    border-radius: 14px;
+    padding: 12px 12px 12px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow);
+  }
+  .install-banner[hidden] { display: none; }
+  .install-icon {
+    flex-shrink: 0;
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--brass) 18%, transparent);
+    color: var(--brass-bright);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .install-text { flex: 1; min-width: 0; }
+  .install-text strong { display: block; font-size: 13.5px; font-weight: 600; }
+  .install-text p { margin: 2px 0 0; font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+  .install-btn {
+    flex-shrink: 0;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--teal);
+    color: #F6F3EC;
+    border: none;
+    border-radius: 9px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .install-btn:hover { background: var(--teal-deep); }
+  .install-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+  .install-dismiss {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    font-size: 15px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 8px;
+    align-self: flex-start;
+  }
+  .install-dismiss:hover { color: var(--ink); background: var(--surface-2); }
+  .install-dismiss:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+  /* account cards */
+  .cards {
+    padding: 20px 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px 16px 14px;
+    box-shadow: var(--shadow);
+  }
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .card-id { min-width: 0; }
+  .card-id .name {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .role-chip {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    background: color-mix(in srgb, var(--brass) 16%, transparent);
+    color: var(--brass-bright);
+    border: 1px solid color-mix(in srgb, var(--brass) 35%, transparent);
+  }
+  .remove-btn {
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .remove-btn:hover { color: var(--danger); background: var(--surface-2); }
+  .remove-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+  .code-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .ring-wrap { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); width: 52px; height: 52px; }
+  .ring-track { fill: none; stroke: var(--ring-track); stroke-width: 4; }
+  .ring-progress {
+    fill: none;
+    stroke: var(--teal);
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.3s linear, stroke 0.3s ease;
+  }
+  .ring-wrap.warn .ring-progress { stroke: var(--danger); }
+  .ring-num {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+  }
+  .ring-wrap.warn .ring-num { color: var(--danger); }
+
+  .code-btn {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+    text-align: start;
+  }
+  .code-btn:hover { border-color: var(--teal); }
+  .code-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+  .code-digits {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 27px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  .copy-hint {
+    font-size: 11px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .copy-hint.copied { color: var(--success); }
+
+  /* auth gates (login / link-secret) */
+  .gate {
+    margin: 20px 16px 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px 16px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gate[hidden] { display: none; }
+  .gate-lead { font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 4px; }
+  .gate-lead strong { color: var(--ink); }
+  .field { margin: 0; }
+  .field label {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 5px;
+  }
+  .field input, .settings-panel input {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  #linkSecretInput {
+    font-family: 'IBM Plex Mono', monospace;
+    direction: ltr;
+    text-align: right;
+  }
+  .field input:focus, .settings-panel input:focus { outline: none; border-color: var(--teal); }
+  .gate .row { display: flex; gap: 10px; margin-top: 4px; }
+
+  .btn {
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 11px 16px;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .btn-primary { background: var(--teal); color: #F6F3EC; flex: 1; }
+  .btn-primary:hover { background: var(--teal-deep); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--ink-soft); border-color: var(--line); }
+  .btn-ghost:hover { border-color: var(--ink-faint); }
+  .btn-block { width: 100%; }
+  .btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+  .form-error { font-size: 12px; color: var(--danger); margin-top: -2px; }
+
+  .settings-toggle {
+    align-self: center;
+    margin-top: 6px;
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    font-family: inherit;
+    font-size: 11.5px;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .settings-toggle:hover { color: var(--teal); }
+  .settings-panel {
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+    margin-top: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .settings-panel[hidden] { display: none; }
+  .settings-panel label { font-size: 12px; color: var(--ink-soft); font-weight: 500; }
+  .settings-hint { font-size: 11px; color: var(--ink-faint); line-height: 1.5; margin: 0; }
+
+  .welcome { margin: 0 0 2px; font-size: 13.5px; color: var(--ink-soft); }
+  .welcome strong { color: var(--ink); font-weight: 600; }
+  .unlink-btn {
+    align-self: center;
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    font-family: inherit;
+    font-size: 11.5px;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 6px;
+  }
+  .unlink-btn:hover { color: var(--danger); }
+
+  .footnote {
+    margin: 22px 16px 0;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ring-progress { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="brand">
+      <div class="brand-mark">م</div>
+      <div class="brand-text">
+        <h1>مُصادق الرقابة</h1>
+        <p>رموز التحقق للحسابات التجريبية — بوابة الرقابة والتفتيش</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="install-banner" id="installBanner" hidden>
+    <div class="install-icon">⬇</div>
+    <div class="install-text">
+      <strong id="installTitle">ثبّت التطبيق على هاتفك</strong>
+      <p id="installBody">اضغط الزر لتثبيته بأيقونته الخاصة.</p>
+    </div>
+    <button class="install-btn" id="installBtn" type="button" hidden>تثبيت</button>
+    <button class="install-dismiss" id="installDismiss" type="button" aria-label="إغلاق">✕</button>
+  </div>
+
+  <!-- gate 1: real login against the Inspection Portal backend -->
+  <form class="gate" id="loginGate">
+    <p class="gate-lead">أدخل اسم المستخدم وكلمة المرور الخاصين بحسابك للاطّلاع على رمز التحقق الخاص بك فقط.</p>
+
+    <div class="field">
+      <label for="userInput">اسم المستخدم</label>
+      <input id="userInput" type="text" autocomplete="username" required>
+    </div>
+    <div class="field">
+      <label for="passInput">كلمة المرور</label>
+      <input id="passInput" type="password" autocomplete="current-password" required>
+    </div>
+
+    <p class="form-error" id="loginError" hidden></p>
+    <button type="submit" class="btn btn-primary btn-block" id="loginBtn">دخول</button>
+  </form>
+
+  <!-- gate 2: link this device to the authenticated user's own secret, once -->
+  <form class="gate" id="linkGate" hidden>
+    <p class="gate-lead">أهلًا <strong id="linkUserLabel"></strong> — اربط رمز TOTP الخاص بحسابك على هذا الجهاز (مرة واحدة فقط).</p>
+    <div class="field">
+      <label for="linkSecretInput">السرّ (Base32 TOTP Secret)</label>
+      <input id="linkSecretInput" type="text" placeholder="PWW7EAEBFPGZMC27I5G4TIHKBIPE7TZL" autocomplete="off" required>
+    </div>
+    <p class="form-error" id="linkError" hidden></p>
+    <div class="row">
+      <button type="submit" class="btn btn-primary">ربط الرمز</button>
+      <button type="button" class="btn btn-ghost" id="linkLogout">تسجيل الخروج</button>
+    </div>
+  </form>
+
+  <!-- unlocked: this one authenticated user's own live code -->
+  <div class="cards" id="accountView" hidden>
+    <p class="welcome">مرحبًا، <strong id="accountUserLabel"></strong></p>
+    <div class="card">
+      <div class="code-row">
+        <div class="ring-wrap" id="ring">
+          <svg viewBox="0 0 52 52">
+            <circle class="ring-track" cx="26" cy="26" r="22"></circle>
+            <circle class="ring-progress" id="ringProgress" cx="26" cy="26" r="22" stroke-dashoffset="0"></circle>
+          </svg>
+          <span class="ring-num" id="ringSeconds">30</span>
+        </div>
+        <button class="code-btn" type="button" id="copyBtn">
+          <span class="code-digits" id="codeDigits">——&nbsp;——&nbsp;——</span>
+          <span class="copy-hint" id="copyHint">نسخ</span>
+        </button>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-block" id="accountLogout">تسجيل الخروج</button>
+    <button class="unlink-btn" id="unlinkBtn" type="button">إلغاء ربط هذا الحساب من الجهاز</button>
+  </div>
+
+  <p class="footnote">كلمة المرور تُتحقَّق منها فعليًا عبر خادم بوابة الرقابة. رمز التحقق يُحسب محليًا داخل متصفحك (RFC 6238) ولا يُرسل لأي خادم، ولا يظهر إلا بعد التحقق من هويتك.</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- PWA install: manifest, icons, offline shell ----
+  var ICON_B64 = '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9MbPXnp6FuYqXbMwV/nZS08P0B8VoFted9kL0zWvu+yFAfqlAvTKT12wPT+886R0xQ/vPCk/dcH2AP1SAXrnTVedk7NOns+knXXyfN501TkB+qcC9NIfXf+9mbQ/uv57A/RTBeilmRrkjhsvyaTcceMlmalBgH6qAL01U4PcedOunLdjIc+X83Ys5M6bdmWmBgH6qwL03h+89qV5zYXbc7y95sLt+YPXvjRA/1WAqXDDq8/K8XbDq88KMB0qAEBzKgBAcyoAQHMqAEBzKgBAcyoAQHMqAEBzKgBAcyoAQHMqAEBzKgBAcyoAQHMqAEBzKgBAcyoAQHMqAEBzKgBAcyoAQHMqAEBzKgBAcyoAQHMqAEBzKgBAcyoAQHMqAEBzKgBAcyoAQHMqAEBzKgBAcyoAQHMqAEBzKgBAcyoAQHMqAEBzKgBAc4YBpsadN+0KwLNRAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJpTAQCaUwEAmlMBAJozDBwnV99+KAB0UwUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGhOBQBoTgUAaE4FAGjO/wXW5fNbXJEXfgAAAABJRU5ErkJggg==';
+  var iconDataUri = 'data:image/png;base64,' + ICON_B64;
+
+  try {
+    document.getElementById('appleTouchIcon').setAttribute('href', iconDataUri);
+    document.getElementById('faviconIcon').setAttribute('href', iconDataUri);
+
+    var manifest = {
+      name: 'مُصادق الرقابة',
+      short_name: 'مُصادق الرقابة',
+      description: 'مولّد رموز التحقق (TOTP) لحسابات بوابة الرقابة والتفتيش',
+      start_url: '.',
+      scope: '.',
+      display: 'standalone',
+      orientation: 'portrait',
+      dir: 'rtl',
+      lang: 'ar',
+      background_color: '#F6F3EC',
+      theme_color: '#1B5E5E',
+      icons: [
+        { src: iconDataUri, sizes: '512x512', type: 'image/png', purpose: 'any' },
+        { src: iconDataUri, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+      ]
+    };
+    var manifestUri = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest));
+    document.getElementById('manifestLink').setAttribute('href', manifestUri);
+  } catch (e) {}
+
+  // Offline app-shell caching. Best-effort: silently no-ops where unsupported (notably Safari's
+  // handling of blob:-registered service workers is inconsistent) - installability itself does
+  // not depend on this succeeding.
+  if ('serviceWorker' in navigator) {
+    try {
+      var swSource = [
+        "self.addEventListener('install', function (event) {",
+        "  self.skipWaiting();",
+        "  event.waitUntil(caches.open('totp-shell-v1').then(function (cache) {",
+        "    return cache.add(self.registration.scope);",
+        "  }));",
+        "});",
+        "self.addEventListener('activate', function (event) { event.waitUntil(self.clients.claim()); });",
+        "self.addEventListener('fetch', function (event) {",
+        "  if (event.request.mode === 'navigate') {",
+        "    event.respondWith(fetch(event.request).catch(function () {",
+        "      return caches.match(self.registration.scope);",
+        "    }));",
+        "  }",
+        "});"
+      ].join('\n');
+      var swBlob = new Blob([swSource], { type: 'text/javascript' });
+      var swUrl = URL.createObjectURL(swBlob);
+      navigator.serviceWorker.register(swUrl).catch(function () {});
+    } catch (e) {}
+  }
+
+  // ---- visible install affordance (banner + button on the page itself) ----
+  (function setupInstallBanner() {
+    var DISMISS_KEY = 'inspection-totp-install-dismissed';
+    var banner = document.getElementById('installBanner');
+    var titleEl = document.getElementById('installTitle');
+    var bodyEl = document.getElementById('installBody');
+    var installBtn = document.getElementById('installBtn');
+    var dismissBtn = document.getElementById('installDismiss');
+
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true;
+    if (isStandalone) return;
+
+    var dismissed = false;
+    try { dismissed = localStorage.getItem(DISMISS_KEY) === '1'; } catch (e) {}
+    if (dismissed) return;
+
+    var ua = navigator.userAgent || '';
+    var isIOS = /iPad|iPhone|iPod/.test(ua) ||
+      (ua.indexOf('Macintosh') !== -1 && 'ontouchend' in document);
+
+    function show() { banner.hidden = false; }
+    function dismiss() {
+      banner.hidden = true;
+      try { localStorage.setItem(DISMISS_KEY, '1'); } catch (e) {}
+    }
+    dismissBtn.addEventListener('click', dismiss);
+
+    if (isIOS) {
+      titleEl.textContent = 'ثبّت التطبيق على شاشتك الرئيسية';
+      bodyEl.textContent = 'اضغط زر المشاركة ⬆️ أسفل الشاشة، ثم اختر "إضافة إلى الشاشة الرئيسية".';
+      installBtn.hidden = true;
+      show();
+      return;
+    }
+
+    // Android/Chrome/Edge: the browser fires this only if install criteria are met.
+    var deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      titleEl.textContent = 'ثبّت التطبيق على هاتفك';
+      bodyEl.textContent = 'يعمل بأيقونته الخاصة وبلا شريط متصفح.';
+      installBtn.hidden = false;
+      show();
+    });
+
+    installBtn.addEventListener('click', function () {
+      if (!deferredPrompt) return;
+      installBtn.disabled = true;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(function () {
+        deferredPrompt = null;
+        dismiss();
+      });
+    });
+
+    window.addEventListener('appinstalled', dismiss);
+  })();
+
+  var PERIOD = 30;
+  var DIGITS = 6;
+  // Served from the same origin as the Inspection Portal API itself (nginx
+  // proxies both) - so this is always a same-origin relative path, no CORS,
+  // no external server address to configure or get wrong.
+  var API_BASE = '/api/v1';
+  var SESSION_KEY = 'inspection-totp-session'; // sessionStorage: which user this tab authenticated as
+  var SECRET_KEY_PREFIX = 'inspection-totp-secret-'; // localStorage per username, device-local only
+
+  function getSessionUser() {
+    try { return sessionStorage.getItem(SESSION_KEY) || ''; } catch (e) { return ''; }
+  }
+  function setSessionUser(u) {
+    try {
+      if (u) sessionStorage.setItem(SESSION_KEY, u);
+      else sessionStorage.removeItem(SESSION_KEY);
+    } catch (e) {}
+  }
+  function getLinkedSecret(username) {
+    try { return localStorage.getItem(SECRET_KEY_PREFIX + username) || ''; } catch (e) { return ''; }
+  }
+  function setLinkedSecret(username, secret) {
+    try { localStorage.setItem(SECRET_KEY_PREFIX + username, secret); } catch (e) {}
+  }
+  function removeLinkedSecret(username) {
+    try { localStorage.removeItem(SECRET_KEY_PREFIX + username); } catch (e) {}
+  }
+
+  // ---- TOTP (RFC 6238 / RFC 4226) ----
+  function base32Decode(input) {
+    var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    var clean = input.toUpperCase().replace(/[^A-Z2-7]/g, '');
+    var bits = '';
+    for (var i = 0; i < clean.length; i++) {
+      var val = alphabet.indexOf(clean[i]);
+      if (val === -1) continue;
+      bits += val.toString(2).padStart(5, '0');
+    }
+    var bytes = [];
+    for (var j = 0; j + 8 <= bits.length; j += 8) {
+      bytes.push(parseInt(bits.substr(j, 8), 2));
+    }
+    return new Uint8Array(bytes);
+  }
+
+  var keyCache = {};
+  function getKey(secret) {
+    if (keyCache[secret]) return keyCache[secret];
+    var keyBytes = base32Decode(secret);
+    var p = crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+    keyCache[secret] = p;
+    return p;
+  }
+
+  async function computeTotp(secret, epochSeconds) {
+    var counter = Math.floor(epochSeconds / PERIOD);
+    var buf = new ArrayBuffer(8);
+    var view = new DataView(buf);
+    view.setUint32(0, Math.floor(counter / 4294967296), false);
+    view.setUint32(4, counter >>> 0, false);
+    var key = await getKey(secret);
+    var sigBuf = await crypto.subtle.sign('HMAC', key, buf);
+    var hmac = new Uint8Array(sigBuf);
+    var offset = hmac[hmac.length - 1] & 0x0f;
+    var binCode = ((hmac[offset] & 0x7f) << 24) |
+                  ((hmac[offset + 1] & 0xff) << 16) |
+                  ((hmac[offset + 2] & 0xff) << 8) |
+                  (hmac[offset + 3] & 0xff);
+    var mod = Math.pow(10, DIGITS);
+    return (binCode % mod).toString().padStart(DIGITS, '0');
+  }
+
+  // ---- screens ----
+  var loginGate = document.getElementById('loginGate');
+  var linkGate = document.getElementById('linkGate');
+  var accountView = document.getElementById('accountView');
+
+  function showScreen(name) {
+    loginGate.hidden = name !== 'login';
+    linkGate.hidden = name !== 'link';
+    accountView.hidden = name !== 'account';
+  }
+
+  // ---- screen 1: login ----
+  var userInput = document.getElementById('userInput');
+  var passInput = document.getElementById('passInput');
+  var loginBtn = document.getElementById('loginBtn');
+  var loginError = document.getElementById('loginError');
+
+  document.getElementById('loginGate').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    loginError.hidden = true;
+    var username = userInput.value.trim();
+    var password = passInput.value;
+    if (!username || !password) return;
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'يتحقق...';
+    try {
+      var res = await fetch(API_BASE + '/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, password: password })
+      });
+
+      if (res.ok) {
+        setSessionUser(username);
+        passInput.value = '';
+        enterAsUser(username);
+        return;
+      }
+
+      var detail = 'بيانات الدخول غير صحيحة.';
+      try {
+        var body = await res.json();
+        if (res.status === 423) detail = 'الحساب مقفل مؤقتًا بسبب محاولات فاشلة متكررة — حاول لاحقًا.';
+        else if (res.status === 429) detail = 'محاولات كثيرة من هذا الجهاز — انتظر قليلًا ثم أعد المحاولة.';
+        else if (res.status === 403) detail = 'الحساب معطَّل.';
+        else if (body && body.detail) detail = String(body.detail);
+      } catch (e2) {}
+      loginError.textContent = detail;
+      loginError.hidden = false;
+    } catch (networkErr) {
+      loginError.textContent = 'تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت.';
+      loginError.hidden = false;
+    } finally {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'دخول';
+    }
+  });
+
+  function enterAsUser(username) {
+    var secret = getLinkedSecret(username);
+    if (secret) {
+      startAccountView(username, secret);
+    } else {
+      document.getElementById('linkUserLabel').textContent = username;
+      linkGate.dataset.username = username;
+      showScreen('link');
+    }
+  }
+
+  // ---- screen 2: link secret (once per user per device) ----
+  var linkSecretInput = document.getElementById('linkSecretInput');
+  var linkError = document.getElementById('linkError');
+
+  document.getElementById('linkGate').addEventListener('submit', function (e) {
+    e.preventDefault();
+    linkError.hidden = true;
+    var username = linkGate.dataset.username;
+    var secretClean = linkSecretInput.value.trim().toUpperCase().replace(/[^A-Z2-7]/g, '');
+    if (secretClean.length < 8) {
+      linkError.textContent = 'السرّ قصير جدًا — تأكد من نسخه كاملاً.';
+      linkError.hidden = false;
+      return;
+    }
+    setLinkedSecret(username, secretClean);
+    linkSecretInput.value = '';
+    startAccountView(username, secretClean);
+  });
+
+  document.getElementById('linkLogout').addEventListener('click', logout);
+
+  // ---- screen 3: the user's own live code ----
+  var ringWrap = document.getElementById('ring');
+  var ringProgress = document.getElementById('ringProgress');
+  var ringSeconds = document.getElementById('ringSeconds');
+  var codeDigits = document.getElementById('codeDigits');
+  var copyBtn = document.getElementById('copyBtn');
+  var copyHint = document.getElementById('copyHint');
+  var RING_R = 22;
+  var RING_C = 2 * Math.PI * RING_R;
+  ringProgress.setAttribute('stroke-dasharray', RING_C);
+
+  var activeUser = '';
+  var activeSecret = '';
+  var lastCounter = -1;
+
+  function startAccountView(username, secret) {
+    activeUser = username;
+    activeSecret = secret;
+    lastCounter = -1;
+    document.getElementById('accountUserLabel').textContent = username;
+    showScreen('account');
+    tick();
+  }
+
+  async function tick() {
+    if (accountView.hidden || !activeSecret) return;
+    var now = Math.floor(Date.now() / 1000);
+    var secondsRemaining = PERIOD - (now % PERIOD);
+
+    var offset = RING_C * (1 - secondsRemaining / PERIOD);
+    ringProgress.setAttribute('stroke-dashoffset', offset.toFixed(2));
+    ringSeconds.textContent = secondsRemaining;
+    ringWrap.classList.toggle('warn', secondsRemaining <= 5);
+
+    var counter = Math.floor(now / PERIOD);
+    if (counter !== lastCounter) {
+      lastCounter = counter;
+      try {
+        var code = await computeTotp(activeSecret, now);
+        codeDigits.textContent = code.slice(0, 3) + ' ' + code.slice(3);
+      } catch (e) {
+        codeDigits.textContent = 'خطأ';
+      }
+    }
+  }
+
+  copyBtn.addEventListener('click', function () {
+    var raw = codeDigits.textContent.replace(/\s| /g, '');
+    copyToClipboard(raw).then(function (ok) {
+      copyHint.textContent = ok ? 'تم النسخ' : 'انسخ يدويًا';
+      copyHint.classList.toggle('copied', ok);
+      setTimeout(function () {
+        copyHint.textContent = 'نسخ';
+        copyHint.classList.remove('copied');
+      }, 1400);
+    });
+  });
+
+  function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(function () { return true; }).catch(function () { return false; });
+    }
+    return Promise.resolve(false);
+  }
+
+  document.getElementById('accountLogout').addEventListener('click', logout);
+
+  document.getElementById('unlinkBtn').addEventListener('click', function () {
+    if (!activeUser) return;
+    removeLinkedSecret(activeUser);
+    logout();
+  });
+
+  function logout() {
+    setSessionUser('');
+    activeUser = '';
+    activeSecret = '';
+    userInput.value = '';
+    passInput.value = '';
+    showScreen('login');
+  }
+
+  // ---- boot ----
+  var existingSession = getSessionUser();
+  if (existingSession) {
+    enterAsUser(existingSession);
+  } else {
+    showScreen('login');
+  }
+  setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>

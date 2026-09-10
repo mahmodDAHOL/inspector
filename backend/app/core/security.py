@@ -5,6 +5,9 @@ from jose import jwt
 from passlib.context import CryptContext
 import pyotp
 import base64
+import hashlib
+import hmac
+import secrets
 
 from app.core.config import get_settings
 
@@ -73,3 +76,21 @@ def get_totp_uri(secret: str, username: str) -> str:
         name=username,
         issuer_name=get_settings().TOTP_ISSUER
     )
+
+
+# ---- Trusted-device tokens ("remember this device", skips TOTP only) ----
+# The token itself is a fresh 256-bit server-generated random value, never a
+# user-chosen secret, so a fast SHA-256 digest is the right tool here (like
+# hashing an API key), not a slow salted KDF like argon2 which is for
+# defending low-entropy, human-chosen passwords against offline guessing.
+
+def generate_device_secret() -> str:
+    return secrets.token_urlsafe(32)
+
+
+def hash_device_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def verify_device_token(token: str, token_hash: str) -> bool:
+    return hmac.compare_digest(hash_device_token(token), token_hash)

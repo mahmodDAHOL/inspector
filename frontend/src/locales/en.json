@@ -18,7 +18,10 @@
     "awaitingResponse": "Awaiting Response",
     "hoursShort": "h",
     "quickActions": "Quick Actions",
-    "manageUsers": "Manage Users"
+    "manageUsers": "Manage Users",
+    "byInspector": "Current Workload by Investigator",
+    "openCasesUnit": "open case(s)",
+    "clickToFilter": "Click to view filtered list"
   },
   "complaints": { "title": "Complaints", "new": "New Complaint", "search": "Search..." },
   "complaint": {
@@ -48,6 +51,22 @@
     "sign": "Sign",
     "readOnlyHint": "Your role has read-only access to this complaint.",
     "hiddenNote": "This note is confidential and hidden from your role.",
+    "progressTitle": "Investigation Progress",
+    "assignedInvestigator": "Assigned Investigator",
+    "unassigned": "Not yet assigned",
+    "daysOpen": "days since received",
+    "dayOpen": "1 day since received",
+    "resolvedIn": "Closed in {n} days",
+    "resolvedInOne": "Closed in 1 day",
+    "firstResponseIn": "First response in {n}{unit}",
+    "noResponseYet": "Awaiting first response",
+    "overdue": "Overdue",
+    "noteType": "Note Type",
+    "noteTypes": {
+      "investigation": "General Note",
+      "finding": "Finding",
+      "action": "Action Taken"
+    },
     "status": {
       "received": "Received",
       "under_investigation": "Under Investigation",
@@ -97,8 +116,28 @@
       "assigned": "Assigned",
       "escalated": "Escalated",
       "note_added": "Note Added",
-      "signed": "Report Signed"
+      "signed": "Report Signed",
+      "minute_added": "Minute Added"
     }
+  },
+  "minutes": {
+    "title": "Investigation & Meeting Minutes",
+    "type": "Minute Type",
+    "types": { "investigation": "Investigation Minute", "meeting": "Meeting Minute" },
+    "minuteDate": "Session Date",
+    "titleLabel": "Minute Title",
+    "titlePlaceholder": "e.g. Interview minutes for the employee involved",
+    "attendees": "Attendees",
+    "attendeesPlaceholder": "Names, comma-separated",
+    "summary": "Summary",
+    "summaryPlaceholder": "What was discussed / decided in this session...",
+    "file": "Attachment (PDF)",
+    "pdfOnlyHint": "Only PDF files are accepted.",
+    "fileRequired": "Please attach a PDF for this minute.",
+    "upload": "Add Minute",
+    "uploading": "Uploading...",
+    "empty": "No minutes recorded yet.",
+    "downloadHint": "Click to download the attachment"
   },
   "common": {
     "save": "Save", "cancel": "Cancel", "back": "Back", "all": "All", "manage": "Manage",
@@ -123,7 +162,7 @@
     "empty": "Set a date range (optional) and click Generate to build a report."
   },
   "admin": {
-    "title": "Control Panel",
+    "title": "Settings",
     "users": "Users",
     "usersDesc": "Create, edit and deactivate system users.",
     "roles": "Roles & Permissions",
@@ -226,6 +265,7 @@
       "escalated": "Escalated",
       "note_added": "Note Added",
       "signed": "Report Signed",
+      "minute_added": "Minute Added",
       "login_success": "Login Success",
       "login_failed": "Login Failed",
       "account_locked": "Account Locked",

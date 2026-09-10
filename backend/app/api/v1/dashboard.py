@@ -7,7 +7,7 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.models import Complaint
+from app.models import Complaint, User
 from app.core.deps import get_current_user
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
@@ -62,6 +62,9 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Complaint))
     complaints = result.scalars().all()
 
+    users_result = await db.execute(select(User.id, User.full_name_ar))
+    user_names = {row.id: row.full_name_ar for row in users_result.all()}
+
     total = len(complaints)
     pending = sum(1 for c in complaints if c.status == "under_investigation")
     urgent = sum(1 for c in complaints if c.priority == "urgent")
@@ -70,10 +73,15 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
     by_status = {}
     by_priority = {}
     by_category = {}
+    by_inspector = {}
     for c in complaints:
         by_status[c.status] = by_status.get(c.status, 0) + 1
         by_priority[c.priority] = by_priority.get(c.priority, 0) + 1
         by_category[c.category] = by_category.get(c.category, 0) + 1
+        # Only open (non-closed) complaints count toward current workload.
+        if c.status != "closed":
+            inspector_label = user_names.get(c.assigned_to, "غير مُسند") if c.assigned_to else "غير مُسند"
+            by_inspector[inspector_label] = by_inspector.get(inspector_label, 0) + 1
 
     recent = sorted(complaints, key=lambda c: c.created_at, reverse=True)[:5]
 
@@ -85,6 +93,7 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
         "by_status": by_status,
         "by_priority": by_priority,
         "by_category": by_category,
+        "by_inspector": by_inspector,
         "response": _response_metrics(complaints),
         "recent": [
             {
@@ -94,6 +103,7 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
                 "status": c.status,
                 "priority": c.priority,
                 "created_at": c.created_at.isoformat(),
+                "assigned_to_name": user_names.get(c.assigned_to) if c.assigned_to else None,
             }
             for c in recent
         ],

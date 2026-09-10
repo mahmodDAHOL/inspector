@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from contextlib import asynccontextmanager
 
-from app.api.v1 import auth, complaints, external, users, audit, reports, dashboard, departments
+from app.api.v1 import auth, complaints, external, users, audit, reports, dashboard, departments, minutes
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -32,7 +32,13 @@ app.add_middleware(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins_list,
-    allow_credentials=True,
+    # The app authenticates with a Bearer token (Authorization header / JSON body),
+    # never cookies, so it has no use for CORS "credentials" mode - and turning it
+    # off is what makes it safe to list "*" in ALLOWED_ORIGINS when that's needed
+    # (e.g. calling the API from a page whose exact origin isn't known in advance,
+    # such as a hosted demo/tunnel). allow_origins=["*"] + allow_credentials=True
+    # is the dangerous combination; this app never pairs the two.
+    allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["*"],
     max_age=600,
@@ -40,6 +46,7 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(complaints.router, prefix="/api/v1/complaints", tags=["Complaints"])
+app.include_router(minutes.router, prefix="/api/v1/complaints", tags=["Minutes"])
 app.include_router(external.router, prefix="/api/v1/external", tags=["External"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(audit.router, prefix="/api/v1/audit", tags=["Audit"])

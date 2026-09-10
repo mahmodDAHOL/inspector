@@ -10,6 +10,12 @@
           <option value="escalated">{{ $t('complaint.status.escalated') }}</option>
           <option value="closed">{{ $t('complaint.status.closed') }}</option>
         </select>
+        <select v-model="filter.priority">
+          <option value="">{{ $t('common.all') }}</option>
+          <option value="normal">{{ $t('complaint.priority.normal') }}</option>
+          <option value="urgent">{{ $t('complaint.priority.urgent') }}</option>
+          <option value="critical">{{ $t('complaint.priority.critical') }}</option>
+        </select>
         <input v-model="filter.search" :placeholder="$t('complaints.search')" />
       </div>
       <table>
@@ -30,15 +36,24 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useComplaintStore } from '../stores/complaints'
 import AppLayout from '../components/AppLayout.vue'
 
 const store = useComplaintStore()
-const filter = ref({ status: '', search: '' })
+const route = useRoute()
+// Lets the dashboard's stat cards link straight into a pre-filtered list,
+// e.g. /complaints?status=under_investigation or ?priority=urgent
+const filter = ref({
+  status: typeof route.query.status === 'string' ? route.query.status : '',
+  priority: typeof route.query.priority === 'string' ? route.query.priority : '',
+  search: '',
+})
 
 const filteredComplaints = computed(() => {
   let result = store.complaints
   if (filter.value.status) result = result.filter(c => c.status === filter.value.status)
+  if (filter.value.priority) result = result.filter(c => c.priority === filter.value.priority)
   if (filter.value.search) result = result.filter(c => c.title_ar.includes(filter.value.search))
   return result
 })

@@ -3,6 +3,15 @@
     <main class="content">
       <button class="back-btn" @click="$router.back()">← {{ $t('common.back') }}</button>
 
+      <ComplaintProgressTracker
+        v-if="store.currentComplaint"
+        :status="store.currentComplaint.status"
+        :created-at="store.currentComplaint.created_at"
+        :closed-at="store.currentComplaint.closed_at"
+        :first-response-at="store.currentComplaint.first_response_at"
+        :assignee-name="store.currentComplaint.assigned_to_name"
+      />
+
       <div v-if="store.currentComplaint" class="detail-card">
         <div class="detail-header">
           <h1>{{ store.currentComplaint.title_ar }}</h1>
@@ -41,6 +50,10 @@
 
         <div v-if="canWrite" class="assignment-section">
           <h3>{{ $t('complaint.assignment') }}</h3>
+          <p class="current-assignee">
+            {{ $t('complaint.assignedInvestigator') }}:
+            <strong>{{ store.currentComplaint.assigned_to_name || $t('complaint.unassigned') }}</strong>
+          </p>
           <div class="assign-row">
             <select v-model="selectedUser">
               <option value="">{{ $t('complaint.selectInspector') }}</option>
@@ -54,20 +67,32 @@
           <h3>{{ $t('complaint.notes') }}</h3>
           <form v-if="canWrite" @submit.prevent="addNote" class="note-form">
             <textarea v-model="noteContent" rows="3" :placeholder="$t('complaint.notePlaceholder')"></textarea>
-            <label class="checkbox-label">
-              <input v-model="noteConfidential" type="checkbox" />
-              {{ $t('complaint.confidential') }}
-            </label>
+            <div class="note-form-row">
+              <select v-model="noteType" class="note-type-select">
+                <option value="investigation">{{ $t('complaint.noteTypes.investigation') }}</option>
+                <option value="finding">{{ $t('complaint.noteTypes.finding') }}</option>
+                <option value="action">{{ $t('complaint.noteTypes.action') }}</option>
+              </select>
+              <label class="checkbox-label">
+                <input v-model="noteConfidential" type="checkbox" />
+                {{ $t('complaint.confidential') }}
+              </label>
+            </div>
             <button type="submit" class="btn-primary">{{ $t('complaint.addNote') }}</button>
           </form>
 
           <div v-for="note in store.notes" :key="note.id" class="note-card">
+            <div class="note-card-top">
+              <span class="badge note-type" :class="note.note_type">{{ $t(`complaint.noteTypes.${note.note_type || 'investigation'}`) }}</span>
+              <span v-if="note.is_confidential" class="badge urgent">{{ $t('complaint.confidential') }}</span>
+            </div>
             <p v-if="note.hidden" class="hidden-note">🔒 {{ $t('complaint.hiddenNote') }}</p>
             <p v-else>{{ note.content }}</p>
-            <span v-if="note.is_confidential" class="badge urgent">{{ $t('complaint.confidential') }}</span>
             <small>{{ formatDate(note.created_at) }}</small>
           </div>
         </div>
+
+        <ComplaintMinutes :complaint-id="route.params.id" :can-write="canWrite" />
 
         <div class="history-section">
           <h3>{{ $t('complaint.activityLog') }}</h3>
@@ -109,6 +134,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '../components/AppLayout.vue'
+import ComplaintProgressTracker from '../components/ComplaintProgressTracker.vue'
+import ComplaintMinutes from '../components/ComplaintMinutes.vue'
 import { useComplaintStore } from '../stores/complaints'
 import { useUsersStore } from '../stores/users'
 
@@ -120,6 +147,7 @@ const { t } = useI18n()
 const nextStatus = ref('')
 const selectedUser = ref('')
 const noteContent = ref('')
+const noteType = ref('investigation')
 const noteConfidential = ref(false)
 const showSignModal = ref(false)
 const signTotp = ref('')
@@ -196,9 +224,10 @@ async function addNote() {
   if (!noteContent.value.trim()) return
   actionError.value = ''
   try {
-    await store.addNote(route.params.id, noteContent.value, noteConfidential.value)
+    await store.addNote(route.params.id, noteContent.value, noteConfidential.value, noteType.value)
     noteContent.value = ''
     noteConfidential.value = false
+    noteType.value = 'investigation'
     store.fetchHistory(route.params.id)
   } catch (e) {
     actionError.value = e.response?.data?.detail || t('common.actionFailed')
@@ -237,8 +266,15 @@ async function sign() {
 .assign-row select { width: auto; min-width: 220px; margin: 0; }
 .note-form { margin-bottom: 16px; }
 .note-form textarea { margin-bottom: 8px; }
+.note-form-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 4px; }
+.note-type-select { width: auto; min-width: 160px; margin: 0; }
 .note-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+.note-card-top { display: flex; gap: 8px; margin-bottom: 8px; }
+.badge.note-type { background: rgba(122,122,122,0.12); color: var(--text-secondary); }
+.badge.note-type.finding { background: rgba(59,126,161,0.12); color: var(--color-info); }
+.badge.note-type.action { background: rgba(76,175,80,0.12); color: var(--color-success); }
 .note-card p { margin: 0 0 6px; }
+.current-assignee { font-size: 13px; color: var(--text-secondary); margin: 0 0 12px; }
 .hidden-note { color: var(--text-tertiary); font-style: italic; }
 .readonly-hint { color: var(--text-tertiary); font-size: 13px; }
 .error { color: var(--color-danger); font-size: 13px; margin-top: 8px; }
@@ -272,6 +308,7 @@ async function sign() {
 .timeline-dot.assigned { background: var(--color-info); }
 .timeline-dot.escalated { background: var(--color-danger); }
 .timeline-dot.note_added { background: var(--color-neutral); }
+.timeline-dot.minute_added { background: var(--color-gold); }
 .timeline-dot.signed { background: var(--color-success); }
 .timeline-body { flex: 1; }
 .timeline-title { font-weight: 600; font-size: 14px; color: var(--text-primary); }

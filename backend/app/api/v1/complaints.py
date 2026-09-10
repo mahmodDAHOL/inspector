@@ -5,7 +5,7 @@ from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel, UUID4, field_validator
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -69,7 +69,10 @@ class ComplaintDetailResponse(ComplaintResponse):
     erp_reference_id: Optional[str]
     is_anonymous: bool
     assigned_to: Optional[UUID4]
+    assigned_to_name: Optional[str]
     created_by: UUID4
+    first_response_at: Optional[datetime]
+    closed_at: Optional[datetime]
 
 
 class StatusUpdateRequest(BaseModel):
@@ -80,9 +83,18 @@ class AssignRequest(BaseModel):
     assigned_to: UUID4
 
 
+NOTE_TYPES = ("investigation", "finding", "action")
+
+
 class NoteCreateRequest(BaseModel):
     content: str
     is_confidential: bool = False
+    note_type: str = "investigation"
+
+    @field_validator("note_type")
+    @classmethod
+    def _validate_note_type(cls, value: str) -> str:
+        return value if value in NOTE_TYPES else "investigation"
 
 
 class SignRequest(BaseModel):
@@ -180,10 +192,15 @@ async def create_complaint(
 @router.get("/{complaint_id}", response_model=ComplaintDetailResponse)
 async def get_complaint(complaint_id: UUID4, db: AsyncSession = Depends(get_db)):
     """Get complaint details"""
-    result = await db.execute(select(Complaint).where(Complaint.id == complaint_id))
-    complaint = result.scalar_one_or_none()
-    if not complaint:
+    result = await db.execute(
+        select(Complaint, User)
+        .outerjoin(User, Complaint.assigned_to == User.id)
+        .where(Complaint.id == complaint_id)
+    )
+    row = result.first()
+    if not row:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
+    complaint, assignee = row
 
     return {
         **_serialize_complaint(complaint),
@@ -194,7 +211,10 @@ async def get_complaint(complaint_id: UUID4, db: AsyncSession = Depends(get_db))
         "erp_reference_id": complaint.erp_reference_id,
         "is_anonymous": complaint.is_anonymous,
         "assigned_to": complaint.assigned_to,
+        "assigned_to_name": assignee.full_name_ar if assignee else None,
         "created_by": complaint.created_by,
+        "first_response_at": complaint.first_response_at,
+        "closed_at": complaint.closed_at,
     }
 
 
@@ -383,19 +403,20 @@ async def add_note(
         ).bindparams(
             complaint_id=complaint_id,
             note_content=enc.encrypt(request.content, context="note_content"),
-            note_type="investigation",
+            note_type=request.note_type,
             created_by=created_by,
             is_confidential=request.is_confidential,
         )
     )
     row = note_result.fetchone()
     note_kind = "confidential note" if request.is_confidential else "note"
-    await _log_activity(db, complaint_id, "note_added", f"Investigation {note_kind} added", current_user.id)
+    await _log_activity(db, complaint_id, "note_added", f"Investigation {note_kind} added ({request.note_type})", current_user.id)
     await db.commit()
     return {
         "id": str(row.id),
         "complaint_id": str(complaint_id),
         "content": request.content,
+        "note_type": request.note_type,
         "is_confidential": request.is_confidential,
         "created_at": row.created_at.isoformat(),
     }

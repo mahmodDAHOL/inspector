@@ -12,6 +12,9 @@ export const useAuthStore = defineStore('auth', () => {
     const res = await api.post('/auth/login', { username, password })
     if (res.data.temp_token) {
       localStorage.setItem('temp_token', res.data.temp_token)
+    } else if (res.data.access_token) {
+      // A trusted device skipped the MFA step — tokens are already issued.
+      applySession(res.data)
     }
     return res.data
   }
@@ -21,18 +24,26 @@ export const useAuthStore = defineStore('auth', () => {
       temp_token: localStorage.getItem('temp_token'),
       totp_code: code
     })
-    accessToken.value = res.data.access_token
-    localStorage.setItem('access_token', accessToken.value)
+    applySession(res.data)
     localStorage.removeItem('temp_token')
-    user.value = res.data.user
-    localStorage.setItem('user', JSON.stringify(res.data.user))
     return res.data
+  }
+
+  function applySession(data) {
+    accessToken.value = data.access_token
+    localStorage.setItem('access_token', data.access_token)
+    if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token)
+    if (data.user) {
+      user.value = data.user
+      localStorage.setItem('user', JSON.stringify(data.user))
+    }
   }
 
   function logout() {
     user.value = null
     accessToken.value = null
     localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
     localStorage.removeItem('temp_token')
     localStorage.removeItem('user')
     window.location.href = '/login'

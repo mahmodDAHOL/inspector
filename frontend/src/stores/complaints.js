@@ -77,8 +77,8 @@ export const useComplaintStore = defineStore('complaints', () => {
     history.value = res.data
   }
 
-  async function addNote(id, content, is_confidential = false) {
-    const res = await api.post(`/complaints/${id}/notes`, { content, is_confidential })
+  async function addNote(id, content, is_confidential = false, note_type = 'investigation') {
+    const res = await api.post(`/complaints/${id}/notes`, { content, is_confidential, note_type })
     notes.value.unshift(res.data)
     return res.data
   }

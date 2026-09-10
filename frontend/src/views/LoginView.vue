@@ -20,7 +20,20 @@
       <div v-else>
         <p>{{ $t('login.otpHint') }}</p>
         <div class="otp-inputs">
-          <input v-for="i in 6" :key="i" v-model="totpDigits[i-1]" maxlength="1" class="otp-digit" />
+          <input
+            v-for="i in 6"
+            :key="i"
+            :ref="el => (otpRefs[i - 1] = el)"
+            v-model="totpDigits[i - 1]"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="1"
+            class="otp-digit"
+            @input="onOtpInput(i - 1, $event)"
+            @keydown="onOtpKeydown(i - 1, $event)"
+            @paste="onOtpPaste($event)"
+          />
         </div>
         <p v-if="error" class="error">{{ error }}</p>
         <button class="btn-primary" @click="verify" :disabled="submitting">{{ $t('login.verify') }}</button>
@@ -41,15 +54,46 @@ const { t } = useI18n()
 const step = ref('credentials')
 const form = reactive({ username: '', password: '' })
 const totpDigits = reactive(['', '', '', '', '', ''])
+const otpRefs = ref([])
 const error = ref('')
 const submitting = ref(false)
+
+function onOtpInput(index, event) {
+  const digit = event.target.value.replace(/\D/g, '').slice(-1)
+  totpDigits[index] = digit
+  if (digit && index < 5) {
+    otpRefs.value[index + 1]?.focus()
+  }
+}
+
+function onOtpKeydown(index, event) {
+  if (event.key === 'Backspace' && !totpDigits[index] && index > 0) {
+    otpRefs.value[index - 1]?.focus()
+  }
+}
+
+function onOtpPaste(event) {
+  event.preventDefault()
+  const pasted = (event.clipboardData || window.clipboardData).getData('text')
+  const digits = pasted.replace(/\D/g, '').slice(0, 6).split('')
+  if (!digits.length) return
+  digits.forEach((digit, i) => {
+    totpDigits[i] = digit
+  })
+  const focusIndex = Math.min(digits.length, 6) - 1
+  otpRefs.value[focusIndex]?.focus()
+}
 
 async function submitCredentials() {
   error.value = ''
   submitting.value = true
   try {
-    await auth.login(form.username, form.password)
-    step.value = 'mfa'
+    const data = await auth.login(form.username, form.password)
+    if (data.requires_mfa === false) {
+      router.push('/dashboard')
+    } else {
+      step.value = 'mfa'
+    }
   } catch (e) {
     error.value = e.response?.data?.detail || t('common.loginFailed')
   } finally {

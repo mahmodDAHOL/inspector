@@ -83,6 +83,7 @@ function toggleLocale() {
 
 function logout() {
   localStorage.removeItem('access_token')
+  localStorage.removeItem('refresh_token')
   localStorage.removeItem('temp_token')
   localStorage.removeItem('user')
   router.push('/login')

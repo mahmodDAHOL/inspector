@@ -18,7 +18,10 @@
     "awaitingResponse": "بانتظار الاستجابة",
     "hoursShort": "س",
     "quickActions": "إجراءات سريعة",
-    "manageUsers": "إدارة المستخدمين"
+    "manageUsers": "إدارة المستخدمين",
+    "byInspector": "عبء العمل الحالي حسب المحقق",
+    "openCasesUnit": "قضية مفتوحة",
+    "clickToFilter": "انقر لعرض القائمة المفلترة"
   },
   "complaints": { "title": "الشكاوى", "new": "شكوى جديدة", "search": "بحث..." },
   "complaint": {
@@ -48,6 +51,22 @@
     "sign": "توقيع",
     "readOnlyHint": "دورك يملك صلاحية القراءة فقط على هذه الشكوى.",
     "hiddenNote": "هذه الملاحظة سرّية ومخفية عن دورك الحالي.",
+    "progressTitle": "مسار التحقيق",
+    "assignedInvestigator": "المحقق المسؤول",
+    "unassigned": "لم يُسند بعد",
+    "daysOpen": "يوم منذ الاستلام",
+    "dayOpen": "يوم واحد منذ الاستلام",
+    "resolvedIn": "أُغلقت خلال {n} يوم",
+    "resolvedInOne": "أُغلقت خلال يوم واحد",
+    "firstResponseIn": "أول استجابة خلال {n}{unit}",
+    "noResponseYet": "بانتظار أول استجابة",
+    "overdue": "متأخرة عن المعتاد",
+    "noteType": "نوع الملاحظة",
+    "noteTypes": {
+      "investigation": "ملاحظة عامة",
+      "finding": "نتيجة تحقيق",
+      "action": "إجراء متخذ"
+    },
     "status": {
       "received": "مستلمة",
       "under_investigation": "قيد التحقيق",
@@ -97,8 +116,28 @@
       "assigned": "تعيين",
       "escalated": "تصعيد",
       "note_added": "إضافة ملاحظة",
-      "signed": "توقيع التقرير"
+      "signed": "توقيع التقرير",
+      "minute_added": "إضافة محضر"
     }
+  },
+  "minutes": {
+    "title": "محاضر التحقيق والاجتماعات",
+    "type": "نوع المحضر",
+    "types": { "investigation": "محضر تحقيق", "meeting": "محضر اجتماع" },
+    "minuteDate": "تاريخ الجلسة",
+    "titleLabel": "عنوان المحضر",
+    "titlePlaceholder": "مثال: محضر استجواب الموظف المعني",
+    "attendees": "الحضور",
+    "attendeesPlaceholder": "أسماء الحاضرين مفصولة بفاصلة",
+    "summary": "ملخص المحضر",
+    "summaryPlaceholder": "أهم ما جرى في الجلسة...",
+    "file": "المرفق (PDF)",
+    "pdfOnlyHint": "يُقبل ملف PDF فقط.",
+    "fileRequired": "يرجى إرفاق ملف PDF للمحضر.",
+    "upload": "إضافة المحضر",
+    "uploading": "جارٍ الرفع...",
+    "empty": "لا توجد محاضر مسجّلة بعد.",
+    "downloadHint": "انقر لتنزيل المرفق"
   },
   "common": {
     "save": "حفظ", "cancel": "إلغاء", "back": "رجوع", "all": "الكل", "manage": "إدارة",
@@ -123,7 +162,7 @@
     "empty": "حدد فترة زمنية (اختياري) واضغط إنشاء لتوليد التقرير."
   },
   "admin": {
-    "title": "لوحة التحكم",
+    "title": "الإعدادات",
     "users": "المستخدمون",
     "usersDesc": "إنشاء وتعديل وتعطيل مستخدمي النظام.",
     "roles": "الأدوار والصلاحيات",
@@ -226,6 +265,7 @@
       "escalated": "تصعيد",
       "note_added": "إضافة ملاحظة",
       "signed": "توقيع التقرير",
+      "minute_added": "إضافة محضر",
       "login_success": "تسجيل دخول ناجح",
       "login_failed": "فشل تسجيل الدخول",
       "account_locked": "تم قفل الحساب",

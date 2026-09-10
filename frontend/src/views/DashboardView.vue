@@ -5,26 +5,30 @@
         <h1>{{ $t('dashboard.title') }}</h1>
 
         <div class="stats-grid">
-          <div class="stat-card">
+          <router-link to="/complaints" class="stat-card">
             <div class="stat-icon">▣</div>
             <div class="stat-value">{{ store.total }}</div>
             <div class="stat-label">{{ $t('dashboard.totalComplaints') }}</div>
-          </div>
-          <div class="stat-card pending">
+            <span class="stat-hint">{{ $t('dashboard.clickToFilter') }}</span>
+          </router-link>
+          <router-link to="/complaints?status=under_investigation" class="stat-card pending">
             <div class="stat-icon">◷</div>
             <div class="stat-value">{{ store.pending }}</div>
             <div class="stat-label">{{ $t('dashboard.pendingInvestigation') }}</div>
-          </div>
-          <div class="stat-card urgent">
+            <span class="stat-hint">{{ $t('dashboard.clickToFilter') }}</span>
+          </router-link>
+          <router-link to="/complaints?priority=urgent" class="stat-card urgent">
             <div class="stat-icon">!</div>
             <div class="stat-value">{{ store.urgent }}</div>
             <div class="stat-label">{{ $t('dashboard.urgentComplaints') }}</div>
-          </div>
-          <div class="stat-card closed">
+            <span class="stat-hint">{{ $t('dashboard.clickToFilter') }}</span>
+          </router-link>
+          <router-link to="/complaints?status=closed" class="stat-card closed">
             <div class="stat-icon">✓</div>
             <div class="stat-value">{{ store.closed }}</div>
             <div class="stat-label">{{ $t('dashboard.closedComplaints') }}</div>
-          </div>
+            <span class="stat-hint">{{ $t('dashboard.clickToFilter') }}</span>
+          </router-link>
         </div>
 
         <section class="response-section">
@@ -61,6 +65,13 @@
           </div>
         </div>
 
+        <section v-if="Object.keys(store.byInspector).length" class="inspector-section">
+          <h2 class="section-title">{{ $t('dashboard.byInspector') }}</h2>
+          <div class="chart-card">
+            <SimpleBarChart :data="store.byInspector" />
+          </div>
+        </section>
+
         <h2 class="section-title">{{ $t('dashboard.quickActions') }}</h2>
         <div class="actions">
           <button class="btn-primary" @click="$router.push('/complaints/new')">+ {{ $t('dashboard.newComplaint') }}</button>
@@ -73,7 +84,8 @@
           <h3>{{ $t('dashboard.recentComplaints') }}</h3>
           <div v-for="c in store.recent" :key="c.id" class="complaint-row" @click="$router.push(`/complaints/${c.id}`)">
             <span class="mono">{{ c.complaint_number }}</span>
-            <span>{{ c.title_ar }}</span>
+            <span class="row-title">{{ c.title_ar }}</span>
+            <span class="row-assignee">{{ c.assigned_to_name || $t('complaint.unassigned') }}</span>
             <span :class="['badge', c.priority]">{{ priorityLabels[c.priority] || c.priority }}</span>
             <span :class="['badge', c.status]">{{ statusLabels[c.status] || c.status }}</span>
           </div>
@@ -142,12 +154,32 @@ const categoryLabels = computed(() => ({
 .dashboard { padding: 24px; }
 .section-title { font-size: 16px; margin: 28px 0 14px; color: var(--text-secondary); }
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 8px; }
-.stat-card { background: var(--bg-card); padding: 20px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); }
+.stat-card {
+  position: relative;
+  display: block;
+  background: var(--bg-card);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  border-top: 3px solid var(--color-primary);
+  box-shadow: var(--shadow-md);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stat-card:hover, .stat-card:focus-visible { transform: translateY(-3px); box-shadow: var(--shadow-lg, 0 12px 24px rgba(0,0,0,0.12)); outline: none; }
 .stat-card .stat-icon { font-size: 28px; margin-bottom: 8px; }
 .stat-card .stat-value { font-size: 32px; font-weight: 600; color: var(--text-primary); }
 .stat-card .stat-label { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
+.stat-hint { display: block; font-size: 11px; color: var(--text-tertiary); opacity: 0; transition: opacity 0.15s ease; margin-top: 6px; }
+.stat-card:hover .stat-hint, .stat-card:focus-visible .stat-hint { opacity: 1; }
+.stat-card.pending { border-top-color: var(--color-warning); }
 .stat-card.pending .stat-icon { color: var(--color-warning); }
+.stat-card.urgent { border-top-color: var(--color-danger); }
 .stat-card.urgent .stat-icon { color: var(--color-danger); }
+.stat-card.closed { border-top-color: var(--color-success); }
 .stat-card.closed .stat-icon { color: var(--color-success); }
 
 .response-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -165,11 +197,15 @@ const categoryLabels = computed(() => ({
 .chart-card h3 { margin-bottom: 16px; font-size: 16px; }
 
 .actions { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.inspector-section { margin-bottom: 8px; }
 .recent-section { background: var(--bg-card); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); }
 .recent-section h3 { margin-bottom: 16px; }
-.complaint-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
+.complaint-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; border-radius: 8px; transition: background 0.15s ease; }
 .complaint-row:hover { background: var(--bg-muted); }
+.complaint-row:last-child { border-bottom: none; }
 .complaint-row span { margin-inline-end: 12px; }
+.complaint-row .row-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.complaint-row .row-assignee { font-size: 12.5px; color: var(--text-tertiary); white-space: nowrap; }
 .empty-state { color: var(--text-tertiary); font-size: 13px; padding: 12px 0; }
 
 @media (max-width: 900px) {

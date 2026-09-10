@@ -14,6 +14,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const byStatus = computed(() => stats.value?.by_status || {})
   const byPriority = computed(() => stats.value?.by_priority || {})
   const byCategory = computed(() => stats.value?.by_category || {})
+  const byInspector = computed(() => stats.value?.by_inspector || {})
   const response = computed(() => stats.value?.response || { responded: 0, awaiting_response: 0, response_rate: 0, avg_response_hours: 0 })
 
   async function fetchStats() {
@@ -37,6 +38,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     byStatus,
     byPriority,
     byCategory,
+    byInspector,
     response,
     fetchStats,
   }
