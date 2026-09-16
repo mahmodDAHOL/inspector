@@ -48,7 +48,8 @@ curl --fail --silent --show-error -H 'Host: inspector.momc.sy' http://127.0.0.1:
 echo
 rm -f '$RemoteArchive'
 "@
-    ssh $Target $remoteCommand
+    $remoteCommand | ssh $Target 'bash -s'
+    if ($LASTEXITCODE -ne 0) { throw "Remote deployment failed with exit code $LASTEXITCODE." }
     Write-Host "Deployment completed: https://$DeployHost/"
 }
 finally {
