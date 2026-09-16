@@ -296,10 +296,12 @@ async def assign_complaint(
     if not complaint:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Complaint not found")
 
-    user_result = await db.execute(select(User).where(User.id == request.assigned_to))
+    user_result = await db.execute(select(User).where(User.id == request.assigned_to, User.is_active.is_(True)))
     assignee = user_result.scalar_one_or_none()
     if not assignee:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Active user not found")
+    if assignee.role not in ("super_admin", "admin", "senior_inspector", "inspector"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is not eligible for investigation assignment")
 
     complaint.assigned_to = request.assigned_to
     complaint.updated_at = datetime.utcnow()
@@ -307,7 +309,12 @@ async def assign_complaint(
         complaint.first_response_at = datetime.utcnow()
     await _log_activity(db, complaint_id, "assigned", f"Assigned to {assignee.full_name_ar}", current_user.id)
     await db.commit()
-    return {"message": "Complaint assigned", "complaint_id": str(complaint_id), "assigned_to": str(request.assigned_to)}
+    return {
+        "message": "Complaint assigned",
+        "complaint_id": str(complaint_id),
+        "assigned_to": str(request.assigned_to),
+        "assigned_to_name": assignee.full_name_ar,
+    }
 
 
 @router.post("/{complaint_id}/escalate")

@@ -49,8 +49,17 @@ export const useComplaintStore = defineStore('complaints', () => {
 
   async function assign(id, assigned_to) {
     const res = await api.post(`/complaints/${id}/assign`, { assigned_to })
-    if (currentComplaint.value?.id === id) currentComplaint.value.assigned_to = assigned_to
+    if (currentComplaint.value?.id === id) {
+      currentComplaint.value.assigned_to = res.data.assigned_to
+      currentComplaint.value.assigned_to_name = res.data.assigned_to_name
+    }
     return res.data
+  }
+
+  function clearCurrentComplaint() {
+    currentComplaint.value = null
+    notes.value = []
+    history.value = []
   }
 
   async function escalate(id) {
@@ -102,6 +111,7 @@ export const useComplaintStore = defineStore('complaints', () => {
     create,
     updateStatus,
     assign,
+    clearCurrentComplaint,
     escalate,
     fetchNotes,
     fetchHistory,

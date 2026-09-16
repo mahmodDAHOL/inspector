@@ -152,6 +152,28 @@
     "empty": "No minutes recorded yet.",
     "downloadHint": "Click to download the attachment"
   },
+  "investigationReport": {
+    "title": "Investigation Report",
+    "description": "Prepare a structured, evidence-based report. Finalization locks the report permanently.",
+    "empty": "No investigation report has been created yet.",
+    "saving": "Saving...",
+    "finalize": "Finalize Report",
+    "finalizeHint": "Finalization requires your current authenticator code and cannot be undone.",
+    "finalizeClosedOnly": "The complaint must be closed before the report can be finalized.",
+    "status": {
+      "draft": "Draft",
+      "final": "Final"
+    },
+    "fields": {
+      "title": "Report Title",
+      "scope": "Scope and Questions",
+      "methodology": "Methodology",
+      "findings": "Findings",
+      "evidenceSummary": "Evidence Summary",
+      "conclusion": "Conclusion",
+      "recommendations": "Recommendations"
+    }
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

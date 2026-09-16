@@ -94,6 +94,11 @@
 
         <ComplaintMinutes :complaint-id="route.params.id" :can-write="canWrite" />
 
+        <InvestigationReport
+          :complaint-id="route.params.id"
+          :complaint-status="store.currentComplaint.status"
+        />
+
         <div class="history-section">
           <h3>{{ $t('complaint.activityLog') }}</h3>
           <ol v-if="store.history.length" class="timeline">
@@ -130,12 +135,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '../components/AppLayout.vue'
 import ComplaintProgressTracker from '../components/ComplaintProgressTracker.vue'
 import ComplaintMinutes from '../components/ComplaintMinutes.vue'
+import InvestigationReport from '../components/InvestigationReport.vue'
 import { useComplaintStore } from '../stores/complaints'
 import { useUsersStore } from '../stores/users'
 
@@ -174,12 +180,16 @@ const canEscalate = computed(() => ['received', 'under_investigation'].includes(
 const canWrite = computed(() => currentRole !== 'viewer' && currentRole !== '')
 const canSign = computed(() => ['senior_inspector', 'admin', 'super_admin'].includes(currentRole))
 
-onMounted(() => {
+function loadComplaint() {
+  store.clearCurrentComplaint()
   store.fetchOne(route.params.id)
   store.fetchNotes(route.params.id)
   store.fetchHistory(route.params.id)
   usersStore.fetchUsers()
-})
+}
+
+onMounted(loadComplaint)
+watch(() => route.params.id, loadComplaint)
 
 function formatDate(value) {
   if (!value) return ''

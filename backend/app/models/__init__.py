@@ -7,5 +7,6 @@ from app.models.complaint_log import ComplaintLog
 from app.models.activity_log import ActivityLog
 from app.models.trusted_device import TrustedDevice
 from app.models.complaint_minute import ComplaintMinute
+from app.models.investigation_report import InvestigationReport
 
-__all__ = ["Base", "Department", "User", "Complaint", "ComplaintLog", "ActivityLog", "TrustedDevice", "ComplaintMinute"]
+__all__ = ["Base", "Department", "User", "Complaint", "ComplaintLog", "ActivityLog", "TrustedDevice", "ComplaintMinute", "InvestigationReport"]
