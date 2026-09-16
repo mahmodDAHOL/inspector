@@ -1,5 +1,11 @@
 {
-  "login": { "title": "Secure Login", "subtitle": "Inspection Directorate", "next": "Next", "verify": "Verify", "otpHint": "Enter the 6-digit code from your authenticator app" },
+  "login": {
+    "title": "Secure Login",
+    "subtitle": "Inspection Directorate",
+    "next": "Next",
+    "verify": "Verify",
+    "otpHint": "Enter the 6-digit code from your authenticator app"
+  },
   "dashboard": {
     "title": "Dashboard",
     "newComplaint": "New Complaint",
@@ -23,7 +29,11 @@
     "openCasesUnit": "open case(s)",
     "clickToFilter": "Click to view filtered list"
   },
-  "complaints": { "title": "Complaints", "new": "New Complaint", "search": "Search..." },
+  "complaints": {
+    "title": "Complaints",
+    "new": "New Complaint",
+    "search": "Search..."
+  },
   "complaint": {
     "number": "Number",
     "title": "Title",
@@ -123,7 +133,10 @@
   "minutes": {
     "title": "Investigation & Meeting Minutes",
     "type": "Minute Type",
-    "types": { "investigation": "Investigation Minute", "meeting": "Meeting Minute" },
+    "types": {
+      "investigation": "Investigation Minute",
+      "meeting": "Meeting Minute"
+    },
     "minuteDate": "Session Date",
     "titleLabel": "Minute Title",
     "titlePlaceholder": "e.g. Interview minutes for the employee involved",
@@ -140,12 +153,27 @@
     "downloadHint": "Click to download the attachment"
   },
   "common": {
-    "save": "Save", "cancel": "Cancel", "back": "Back", "all": "All", "manage": "Manage",
-    "comingSoon": "Coming Soon", "loading": "Loading...", "error": "Something went wrong",
-    "none": "None", "close": "Close", "goHome": "Go Home", "pageNotFound": "Page not found",
-    "loginFailed": "Login failed", "verificationFailed": "Verification failed",
-    "actionFailed": "Action failed", "signingFailed": "Signing failed", "saveFailed": "Save failed",
-    "lightMode": "Light mode", "darkMode": "Dark mode", "username": "Username", "password": "Password"
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "all": "All",
+    "manage": "Manage",
+    "comingSoon": "Coming Soon",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "none": "None",
+    "close": "Close",
+    "goHome": "Go Home",
+    "pageNotFound": "Page not found",
+    "loginFailed": "Login failed",
+    "verificationFailed": "Verification failed",
+    "actionFailed": "Action failed",
+    "signingFailed": "Signing failed",
+    "saveFailed": "Save failed",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "username": "Username",
+    "password": "Password"
   },
   "reports": {
     "title": "Reports",
@@ -181,6 +209,10 @@
     "role": "Role",
     "selectRole": "Select Role",
     "password": "Password",
+    "authenticatorSetupTitle": "Authenticator setup",
+    "authenticatorSetupNote": "Give this secret to the new user. They can enter it manually in an authenticator app.",
+    "authenticatorSecret": "Secret key",
+    "copySecret": "Copy secret",
     "status": "Status",
     "active": "Active",
     "inactive": "Inactive",

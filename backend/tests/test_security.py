@@ -1,6 +1,7 @@
 """Unit tests for password hashing, TOTP, and password strength rules."""
 import pytest
 import pyotp
+from fastapi import HTTPException
 
 from app.core.security import (
     get_password_hash,
@@ -9,6 +10,8 @@ from app.core.security import (
     generate_totp_secret,
     verify_totp,
 )
+from app.core.deps import require_roles
+from app.models import User
 
 
 def test_password_hash_round_trip():
@@ -41,3 +44,14 @@ def test_weak_passwords_rejected(password):
 ])
 def test_strong_passwords_accepted(password):
     assert validate_password_strength(password) == password
+
+
+@pytest.mark.asyncio
+async def test_user_creation_role_check_only_allows_superuser():
+    check = require_roles("super_admin")
+
+    assert await check(User(role="super_admin"))
+    with pytest.raises(HTTPException) as error:
+        await check(User(role="admin"))
+
+    assert error.value.status_code == 403

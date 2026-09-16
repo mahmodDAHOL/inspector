@@ -1,5 +1,11 @@
 {
-  "login": { "title": "تسجيل الدخول الآمن", "subtitle": "مديرية الرقابة والتفتيش", "next": "التالي", "verify": "تحقق", "otpHint": "أدخل الرمز المكوّن من ٦ أرقام من تطبيق المصادقة" },
+  "login": {
+    "title": "تسجيل الدخول الآمن",
+    "subtitle": "مديرية الرقابة والتفتيش",
+    "next": "التالي",
+    "verify": "تحقق",
+    "otpHint": "أدخل الرمز المكوّن من ٦ أرقام من تطبيق المصادقة"
+  },
   "dashboard": {
     "title": "لوحة التحكم",
     "newComplaint": "شكوى جديدة",
@@ -23,7 +29,11 @@
     "openCasesUnit": "قضية مفتوحة",
     "clickToFilter": "انقر لعرض القائمة المفلترة"
   },
-  "complaints": { "title": "الشكاوى", "new": "شكوى جديدة", "search": "بحث..." },
+  "complaints": {
+    "title": "الشكاوى",
+    "new": "شكوى جديدة",
+    "search": "بحث..."
+  },
   "complaint": {
     "number": "الرقم",
     "title": "العنوان",
@@ -123,7 +133,10 @@
   "minutes": {
     "title": "محاضر التحقيق والاجتماعات",
     "type": "نوع المحضر",
-    "types": { "investigation": "محضر تحقيق", "meeting": "محضر اجتماع" },
+    "types": {
+      "investigation": "محضر تحقيق",
+      "meeting": "محضر اجتماع"
+    },
     "minuteDate": "تاريخ الجلسة",
     "titleLabel": "عنوان المحضر",
     "titlePlaceholder": "مثال: محضر استجواب الموظف المعني",
@@ -140,12 +153,27 @@
     "downloadHint": "انقر لتنزيل المرفق"
   },
   "common": {
-    "save": "حفظ", "cancel": "إلغاء", "back": "رجوع", "all": "الكل", "manage": "إدارة",
-    "comingSoon": "قريباً", "loading": "جارٍ التحميل...", "error": "حدث خطأ ما",
-    "none": "لا يوجد", "close": "إغلاق", "goHome": "العودة للرئيسية", "pageNotFound": "الصفحة غير موجودة",
-    "loginFailed": "فشل تسجيل الدخول", "verificationFailed": "فشل التحقق",
-    "actionFailed": "فشل الإجراء", "signingFailed": "فشل التوقيع", "saveFailed": "فشل الحفظ",
-    "lightMode": "الوضع الفاتح", "darkMode": "الوضع الداكن", "username": "اسم المستخدم", "password": "كلمة المرور"
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "back": "رجوع",
+    "all": "الكل",
+    "manage": "إدارة",
+    "comingSoon": "قريباً",
+    "loading": "جارٍ التحميل...",
+    "error": "حدث خطأ ما",
+    "none": "لا يوجد",
+    "close": "إغلاق",
+    "goHome": "العودة للرئيسية",
+    "pageNotFound": "الصفحة غير موجودة",
+    "loginFailed": "فشل تسجيل الدخول",
+    "verificationFailed": "فشل التحقق",
+    "actionFailed": "فشل الإجراء",
+    "signingFailed": "فشل التوقيع",
+    "saveFailed": "فشل الحفظ",
+    "lightMode": "الوضع الفاتح",
+    "darkMode": "الوضع الداكن",
+    "username": "اسم المستخدم",
+    "password": "كلمة المرور"
   },
   "reports": {
     "title": "التقارير",
@@ -181,6 +209,10 @@
     "role": "الدور",
     "selectRole": "اختر الدور",
     "password": "كلمة المرور",
+    "authenticatorSetupTitle": "إعداد تطبيق المصادقة",
+    "authenticatorSetupNote": "سلّم هذا المفتاح للمستخدم الجديد لإدخاله يدوياً في تطبيق المصادقة.",
+    "authenticatorSecret": "المفتاح السري",
+    "copySecret": "نسخ المفتاح",
     "status": "الحالة",
     "active": "نشط",
     "inactive": "معطل",

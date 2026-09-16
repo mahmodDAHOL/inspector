@@ -58,6 +58,10 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 
+class UserCreatedResponse(UserResponse):
+    totp_secret: str
+
+
 @router.get("/roles")
 async def list_roles():
     """List available user roles"""
@@ -106,13 +110,13 @@ async def get_user(user_id: UUID4, db: AsyncSession = Depends(get_db)):
     }
 
 
-@router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=UserCreatedResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
     user: UserCreate,
     db: AsyncSession = Depends(get_db),
-    _admin: User = Depends(require_roles("admin", "super_admin")),
+    _admin: User = Depends(require_roles("super_admin")),
 ):
-    """Create new user (admin only)"""
+    """Create new user (superuser only)"""
     existing = await db.execute(select(User).where(User.username == user.username))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists")
@@ -123,6 +127,7 @@ async def create_user(
         department_row = dept_result.fetchone()
         department_id = department_row[0] if department_row else None
 
+    totp_secret = generate_totp_secret()
     new_user = User(
         username=user.username,
         password_hash=get_password_hash(user.password),
@@ -132,7 +137,7 @@ async def create_user(
         phone=enc.encrypt("", context="phone"),
         role=user.role,
         department_id=department_id,
-        totp_secret=enc.encrypt(generate_totp_secret(), context="totp_secret"),
+        totp_secret=enc.encrypt(totp_secret, context="totp_secret"),
     )
     db.add(new_user)
     await db.flush()
@@ -149,6 +154,7 @@ async def create_user(
         "is_active": new_user.is_active,
         "department_id": new_user.department_id,
         "created_at": new_user.created_at.isoformat() if new_user.created_at else None,
+        "totp_secret": totp_secret,
     }
 
 

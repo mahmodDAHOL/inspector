@@ -17,7 +17,7 @@
       <div v-if="activeTab === 'users'" class="tab-panel">
         <div class="panel-header">
           <h2>{{ $t('admin.users') }}</h2>
-          <button class="btn-primary" @click="openUserForm()">+ {{ $t('admin.addUser') }}</button>
+          <button v-if="isSuperAdmin" class="btn-primary" @click="openUserForm()">+ {{ $t('admin.addUser') }}</button>
         </div>
 
         <table>
@@ -160,6 +160,19 @@
           </form>
         </div>
       </div>
+
+      <div v-if="showSecretModal" class="modal-overlay" @click.self="closeSecretModal">
+        <div class="modal">
+          <h2>{{ $t('admin.authenticatorSetupTitle') }}</h2>
+          <p class="hint">{{ $t('admin.authenticatorSetupNote') }}</p>
+          <label class="secret-label">{{ $t('admin.authenticatorSecret') }}</label>
+          <div class="secret-row">
+            <code>{{ createdTotpSecret }}</code>
+            <button type="button" class="btn-small" @click="copySecret">{{ $t('admin.copySecret') }}</button>
+          </div>
+          <button type="button" class="btn-primary" @click="closeSecretModal">{{ $t('common.close') }}</button>
+        </div>
+      </div>
     </main>
   </AppLayout>
 </template>
@@ -187,6 +200,16 @@ const editingDept = ref(null)
 const deptFormError = ref('')
 const appVersion = ref('—')
 const apiHealthy = ref(false)
+const showSecretModal = ref(false)
+const createdTotpSecret = ref('')
+
+const isSuperAdmin = computed(() => {
+  try {
+    return JSON.parse(localStorage.getItem('user') || '{}').role === 'super_admin'
+  } catch {
+    return false
+  }
+})
 
 const tabs = computed(() => [
   { key: 'users', label: t('admin.users') },
@@ -276,6 +299,15 @@ function closeForm() {
   form.is_active = true
 }
 
+function closeSecretModal() {
+  showSecretModal.value = false
+  createdTotpSecret.value = ''
+}
+
+async function copySecret() {
+  await navigator.clipboard.writeText(createdTotpSecret.value)
+}
+
 async function saveUser() {
   formError.value = ''
   try {
@@ -289,7 +321,11 @@ async function saveUser() {
         is_active: form.is_active,
       })
     } else {
-      await usersStore.createUser({ ...form, department_id: form.department_id || null })
+      const createdUser = await usersStore.createUser({ ...form, department_id: form.department_id || null })
+      createdTotpSecret.value = createdUser.totp_secret
+      closeForm()
+      showSecretModal.value = true
+      return
     }
     closeForm()
   } catch (e) {
@@ -357,6 +393,9 @@ async function saveDept() {
 .btn-small.danger { border-color: var(--color-danger); color: var(--color-danger); }
 .checkbox-label { display: flex; align-items: center; gap: 8px; margin: 12px 0; }
 .checkbox-label input { width: auto; margin: 0; }
+.secret-label { display: block; color: var(--text-secondary); font-size: 13px; margin: 12px 0 6px; }
+.secret-row { display: flex; align-items: center; gap: 8px; }
+.secret-row code { flex: 1; padding: 10px; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 6px; font-family: monospace; font-size: 16px; letter-spacing: 1px; overflow-wrap: anywhere; }
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 200; }
 .modal { background: var(--bg-card); padding: 24px; border-radius: 12px; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; }
 .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
