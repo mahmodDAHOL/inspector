@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from contextlib import asynccontextmanager
 
-from app.api.v1 import auth, complaints, external, users, audit, reports, dashboard, departments, minutes, investigation_reports
+from app.api.v1 import auth, complaints, external, users, audit, reports, dashboard, departments, minutes, investigation_reports, evidence
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -54,6 +54,7 @@ app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["Dashboard"])
 app.include_router(departments.router, prefix="/api/v1/departments", tags=["Departments"])
 app.include_router(investigation_reports.router, prefix="/api/v1/complaints", tags=["Investigation Reports"])
+app.include_router(evidence.router, prefix="/api/v1/complaints", tags=["Evidence"])
 
 
 @app.get("/health")

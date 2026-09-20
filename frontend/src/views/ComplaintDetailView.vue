@@ -99,6 +99,8 @@
           :complaint-status="store.currentComplaint.status"
         />
 
+        <ComplaintEvidence :complaint-id="route.params.id" :can-write="canWrite" />
+
         <div class="history-section">
           <h3>{{ $t('complaint.activityLog') }}</h3>
           <ol v-if="store.history.length" class="timeline">
@@ -142,6 +144,7 @@ import AppLayout from '../components/AppLayout.vue'
 import ComplaintProgressTracker from '../components/ComplaintProgressTracker.vue'
 import ComplaintMinutes from '../components/ComplaintMinutes.vue'
 import InvestigationReport from '../components/InvestigationReport.vue'
+import ComplaintEvidence from '../components/ComplaintEvidence.vue'
 import { useComplaintStore } from '../stores/complaints'
 import { useUsersStore } from '../stores/users'
 

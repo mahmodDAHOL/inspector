@@ -33,3 +33,6 @@ class ComplaintMinute(Base):
     file_size_bytes = Column(Integer, nullable=False)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    archived_at = Column(DateTime)
+    archived_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    archived_reason = Column(LargeBinary())

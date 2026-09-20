@@ -115,14 +115,15 @@ async function finalize() {
 </script>
 
 <style scoped>
-.report-section { margin-bottom: 24px; padding: 16px; background: var(--bg-muted); border-radius: 10px; }
+.report-section { margin-bottom: 24px; padding: 20px; background: var(--bg-muted); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: var(--shadow-soft); }
 .section-heading, .finalize-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.section-heading h3 { margin-bottom: 4px; }
+.section-heading h3 { margin-bottom: 4px; font-size: 17px; color: var(--color-primary); }
 .hint { color: var(--text-secondary); font-size: 13px; margin: 0 0 12px; }
 .report-form { display: grid; gap: 12px; }
 .report-form label { display: grid; gap: 4px; font-size: 12.5px; color: var(--text-secondary); }
 .report-form input, .report-form textarea { margin: 0; }
-.report-readonly h4 { margin: 12px 0; }
+.report-readonly { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; box-shadow: var(--shadow-soft); }
+.report-readonly h4 { margin: 0 0 14px; font-size: 16px; }
 dl { display: grid; grid-template-columns: minmax(140px, .3fr) 1fr; gap: 8px 16px; }
 dt { color: var(--text-secondary); font-size: 13px; }
 dd { margin: 0; white-space: pre-wrap; }
@@ -135,5 +136,5 @@ dd { margin: 0; white-space: pre-wrap; }
 .btn-success { padding: 10px 20px; background: var(--color-success); color: white; border: none; border-radius: 8px; cursor: pointer; }
 .btn-secondary { padding: 10px 20px; border: 1px solid var(--border-color); background: transparent; border-radius: 8px; cursor: pointer; color: var(--text-primary); }
 .empty-state { color: var(--text-tertiary); font-size: 13px; }
-@media (max-width: 640px) { dl { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .report-section { padding: 14px; } .section-heading, .finalize-row { align-items: flex-start; flex-direction: column; } dl { grid-template-columns: 1fr; } }
 </style>

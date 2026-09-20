@@ -16,13 +16,21 @@ export const useMinutesStore = defineStore('minutes', () => {
     }
   }
 
-  async function addMinute(complaintId, { minuteType, title, minuteDate, summary, attendees, file }) {
+  async function addMinute(complaintId, { minuteType, title, minuteDate, summary, attendees, idImages, file }) {
     const form = new FormData()
     form.append('minute_type', minuteType)
     form.append('title', title)
     form.append('minute_date', minuteDate)
     form.append('summary', summary)
-    if (attendees) form.append('attendees', attendees)
+    form.append('attendees', JSON.stringify(attendees || []))
+    const imageIndices = []
+      ; (idImages || []).forEach((image, index) => {
+        if (image) {
+          form.append('id_images', image)
+          imageIndices.push(index)
+        }
+      })
+    form.append('id_image_indices', JSON.stringify(imageIndices))
     form.append('file', file)
 
     // Let the browser set its own multipart boundary — the axios instance's
@@ -46,5 +54,19 @@ export const useMinutesStore = defineStore('minutes', () => {
     URL.revokeObjectURL(url)
   }
 
-  return { minutes, loading, fetchMinutes, addMinute, downloadMinuteFile }
+  async function downloadAttendeeIdImage(complaintId, minuteId, attendeeIndex) {
+    const res = await api.get(`/complaints/${complaintId}/minutes/${minuteId}/attendee/${attendeeIndex}/id-image`, { responseType: 'blob' })
+    const url = URL.createObjectURL(res.data)
+    window.open(url, '_blank', 'noopener,noreferrer')
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+  }
+
+  async function archiveMinute(complaintId, minuteId, reason) {
+    const res = await api.post(`/complaints/${complaintId}/minutes/${minuteId}/archive`, { reason })
+    const minute = minutes.value.find(item => item.id === minuteId)
+    if (minute) Object.assign(minute, res.data)
+    return res.data
+  }
+
+  return { minutes, loading, fetchMinutes, addMinute, downloadMinuteFile, downloadAttendeeIdImage, archiveMinute }
 })
