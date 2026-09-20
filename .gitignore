@@ -5,7 +5,7 @@
 *.key
 ssl/*.key
 ssl/*.pem
-
+node_modules/
 # Python
 __pycache__/
 *.pyc
